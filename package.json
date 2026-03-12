@@ -1,0 +1,34 @@
+{
+  "name": "kairos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-chain intent execution layer on Polkadot Hub - Execute at the perfect moment",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "contracts:build": "npm run build -w packages/contracts",
+    "contracts:test": "npm run test -w packages/contracts",
+    "contracts:deploy": "npm run deploy -w packages/contracts",
+    "backend:dev": "npm run start:dev -w packages/backend",
+    "frontend:dev": "npm run dev -w packages/frontend",
+    "solver:dev": "npm run start:dev -w packages/solver-bot",
+    "indexer:dev": "npm run dev -w packages/indexer",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

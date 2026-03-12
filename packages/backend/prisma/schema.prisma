@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Intent {
+  id          String      @id @default(uuid())
+  chainId     Int
+  creator     String
+  description String
+  data        String      @default("")
+  status      String
+  txHash      String?
+  solverId    String?
+  reward      String
+  deadline    DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  executedAt  DateTime?
+
+  solver      Solver?     @relation(fields: [solverId], references: [id])
+  executions  Execution[]
+
+  @@index([status])
+  @@index([creator])
+  @@index([solverId])
+  @@index([createdAt])
+}
+
+model Solver {
+  id            String      @id @default(uuid())
+  address       String      @unique
+  stake         String
+  reputation    Int         @default(0)
+  totalExecuted Int         @default(0)
+  totalFailed   Int         @default(0)
+  isActive      Boolean     @default(true)
+  registeredAt  DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  intents       Intent[]
+  executions    Execution[]
+
+  @@index([address])
+  @@index([isActive])
+}
+
+model Execution {
+  id        String   @id @default(uuid())
+  intentId  String
+  solverId  String
+  route     Json
+  gasUsed   String
+  success   Boolean
+  result    String?
+  error     String?
+  createdAt DateTime @default(now())
+
+  intent    Intent   @relation(fields: [intentId], references: [id])
+  solver    Solver   @relation(fields: [solverId], references: [id])
+
+  @@index([intentId])
+  @@index([solverId])
+  @@index([success])
+}
+
+model XCMMessage {
+  id               String   @id @default(uuid())
+  messageId        String   @unique
+  sourceChain      Int
+  destinationChain Int
+  payload          String
+  status           String
+  fee              String
+  gasLimit         String
+  createdAt        DateTime @default(now())
+  deliveredAt      DateTime?
+
+  @@index([messageId])
+  @@index([status])
+}
+
+model Analytics {
+  id              String   @id @default(uuid())
+  date            DateTime @unique
+  totalIntents    Int      @default(0)
+  completedIntents Int     @default(0)
+  failedIntents   Int      @default(0)
+  totalSolvers    Int      @default(0)
+  totalVolume     String   @default("0")
+  avgExecutionTime Float   @default(0)
+
+  @@index([date])
+}

@@ -1,0 +1,14 @@
+manifest_version: subsquid.io/v0
+name: intentflow-indexer
+version: 1
+description: IntentFlow event indexer
+
+build:
+
+deploy:
+  addons:
+    postgres:
+  processor:
+    cmd: [ "node", "lib/main.js" ]
+  api:
+    cmd: [ "npx", "squid-graphql-server" ]

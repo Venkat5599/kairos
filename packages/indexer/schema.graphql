@@ -1,0 +1,69 @@
+type Intent @entity {
+  id: ID!
+  chainId: Int!
+  creator: String!
+  description: String!
+  data: String
+  status: String!
+  txHash: String
+  solverId: String
+  solver: Solver
+  reward: String!
+  deadline: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  executedAt: DateTime
+  blockNumber: Int!
+  executions: [Execution!] @derivedFrom(field: "intent")
+}
+
+type Solver @entity {
+  id: ID!
+  address: String! @unique
+  stake: String!
+  reputation: Int!
+  totalExecuted: Int!
+  totalFailed: Int!
+  isActive: Boolean!
+  registeredAt: DateTime!
+  intents: [Intent!] @derivedFrom(field: "solver")
+  executions: [Execution!] @derivedFrom(field: "solver")
+}
+
+type Execution @entity {
+  id: ID!
+  intentId: String!
+  intent: Intent!
+  solverId: String!
+  solver: Solver!
+  route: String
+  gasUsed: String
+  success: Boolean!
+  result: String
+  error: String
+  createdAt: DateTime!
+}
+
+type XCMMessage @entity {
+  id: ID!
+  messageId: String! @unique
+  sourceChain: Int!
+  destinationChain: Int!
+  payload: String!
+  status: String!
+  fee: String!
+  gasLimit: String!
+  createdAt: DateTime!
+  deliveredAt: DateTime
+}
+
+type DailyStats @entity {
+  id: ID!
+  date: DateTime! @unique
+  totalIntents: Int!
+  completedIntents: Int!
+  failedIntents: Int!
+  totalSolvers: Int!
+  totalVolume: String!
+  avgExecutionTime: Float!
+}
