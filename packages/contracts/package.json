@@ -1,0 +1,19 @@
+{
+  "name": "@kairos/contracts",
+  "version": "1.0.0",
+  "description": "Kairos smart contracts",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test -vvv",
+    "test:coverage": "forge coverage",
+    "deploy": "forge script script/Deploy.s.sol --rpc-url polkadot_hub --broadcast --verify",
+    "deploy:local": "forge script script/Deploy.s.sol --rpc-url localhost --broadcast",
+    "clean": "forge clean",
+    "format": "forge fmt",
+    "snapshot": "forge snapshot",
+    "forge:install": "forge install"
+  },
+  "devDependencies": {
+    "forge-std": "github:foundry-rs/forge-std#v1.7.6"
+  }
+}

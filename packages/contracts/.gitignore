@@ -1,0 +1,11 @@
+cache/
+out/
+broadcast/
+lib/
+
+# Environment files with private keys
+.env.local
+.env.moonbase
+.env.deployed
+*.key
+*.pem
