@@ -1,173 +1,115 @@
-# Kairos - Quick Start Guide
+# 🚀 Quick Start Guide
 
-Get Kairos running on Moonbase Alpha testnet in 5 minutes!
+Get Kairos running in 5 minutes!
 
-## 🎯 What You'll Do
+## Prerequisites
 
-1. Get testnet tokens (free)
-2. Deploy smart contracts to Moonbase Alpha
-3. Start the frontend
-4. Test creating intents!
+- Node.js 18+
+- MetaMask wallet
+- Moonbase Alpha DEV tokens ([Get from faucet](https://faucet.moonbeam.network/))
 
-## 📋 Prerequisites
+## Option 1: Use Live Demo (Fastest)
 
-- Node.js 18+ installed
-- Git installed
-- A wallet (MetaMask recommended)
+1. Visit: https://kairos-frontend-v969.vercel.app/
+2. Connect your MetaMask wallet
+3. Switch to Moonbase Alpha network
+4. Create an intent: "Send 0.01 DEV to 0x742d35Cc6634C053292a3b844Bc9e7595f0bEb"
+5. Done! ✅
 
-## 🚀 Step-by-Step Deployment
+## Option 2: Run Locally
 
-### Step 1: Clone and Install
+### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Venkat5599/kairos.git
 cd kairos
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
 ```
 
-### Step 2: Check Readiness
+### 3. Setup Environment
 
 ```bash
-cd packages/contracts
-bash check-devnet-ready.sh
+cd packages/frontend
+cp .env.example .env.local
 ```
 
-This will tell you what's missing (if anything).
-
-### Step 3: Get Testnet Tokens
-
-1. Visit https://faucet.moonbeam.network/
-2. Connect your wallet
-3. Click "Request DEV tokens"
-4. Wait ~30 seconds
-
-You'll receive 1 DEV token (enough for deployment).
-
-### Step 4: Configure Private Key
-
-```bash
-cd packages/contracts
-nano .env.moonbase
-```
-
-Replace `YOUR_PRIVATE_KEY_HERE` with your wallet's private key.
-
-**How to get your private key:**
-- MetaMask: Account menu → Account details → Export private key
-- Or create new: `cast wallet new`
-
-⚠️ **Never share this key or commit it to git!**
-
-### Step 5: Deploy Contracts
-
-```bash
-bash deploy-moonbase.sh
-```
-
-This will:
-- Deploy IntentRegistry, IntentRouter, and XCMBridge
-- Show you the contract addresses
-- Verify contracts on Moonscan
-
-**Save the contract addresses!** You'll need them next.
-
-### Step 6: Configure Frontend
-
-```bash
-cd ../frontend
-nano .env.local
-```
-
-Update with your deployed addresses:
-
+Edit `.env.local`:
 ```env
-NEXT_PUBLIC_INTENT_REGISTRY_ADDRESS=0x...
-NEXT_PUBLIC_INTENT_ROUTER_ADDRESS=0x...
-NEXT_PUBLIC_XCM_BRIDGE_ADDRESS=0x...
+NEXT_PUBLIC_INTENT_REGISTRY_ADDRESS=0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB
+NEXT_PUBLIC_INTENT_ROUTER_ADDRESS=0x7E7d7D50353213c96aa1b6697c3e6407B4Df38AF
+NEXT_PUBLIC_XCM_BRIDGE_ADDRESS=0xe84F4ad4c49813Ab6A1D1d84B6347587BB162234
 NEXT_PUBLIC_RPC_URL=https://rpc.api.moonbase.moonbeam.network
 NEXT_PUBLIC_CHAIN_ID=1287
 ```
 
-### Step 7: Start Frontend
+### 4. Start Frontend
 
 ```bash
 npm run dev
 ```
 
-Visit http://localhost:3000
+Open http://localhost:3000
 
-### Step 8: Connect Wallet
+### 5. (Optional) Run Solver Bot
 
-1. Click "Connect Wallet" in the UI
-2. Add Moonbase Alpha network to MetaMask:
-   - Network Name: **Moonbase Alpha**
-   - RPC URL: **https://rpc.api.moonbase.moonbeam.network**
-   - Chain ID: **1287**
-   - Currency: **DEV**
-   - Explorer: **https://moonbase.moonscan.io**
+```bash
+cd packages/solver-bot
+cp .env.example .env
+```
 
-3. Switch to Moonbase Alpha network
-4. Connect your wallet
+Edit `.env` with your private key (testnet only!):
+```env
+PRIVATE_KEY=your_private_key_here
+RPC_URL=https://rpc.api.moonbase.moonbeam.network
+INTENT_REGISTRY_ADDRESS=0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB
+```
 
-### Step 9: Test It!
+Start the bot:
+```bash
+npm run start:simple
+```
 
-1. Enter an intent: "Send 0.1 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
-2. Set reward: 0.01 DEV
-3. Click "Submit Intent"
-4. Confirm transaction in MetaMask
-5. Watch your intent appear in the list!
+## Usage Examples
 
-## 🎉 Success!
+### Simple Transfer
+```
+Send 0.01 DEV to 0x742d35Cc6634C053292a3b844Bc9e7595f0bEb
+```
 
-You've deployed Kairos to Moonbase Alpha testnet!
+### Cross-Chain Transfer
+```
+Bridge 0.1 DEV to Polkadot 0x1234...
+```
 
-## 📊 View Your Contracts
+### Remote Staking
+```
+Stake 1 DOT on Polkadot
+```
 
-Visit Moonscan to see your deployed contracts:
-https://moonbase.moonscan.io/address/YOUR_CONTRACT_ADDRESS
+## Troubleshooting
 
-## 🐛 Troubleshooting
+**"Insufficient funds"**
+- Get DEV tokens from https://faucet.moonbeam.network/
 
-### "Insufficient funds"
-- Get more DEV from the faucet
-- Wait a few minutes and try again
+**"Wrong network"**
+- Switch MetaMask to Moonbase Alpha (Chain ID: 1287)
 
-### "Cannot connect to wallet"
-- Make sure MetaMask is installed
-- Check you're on Moonbase Alpha network
-- Try refreshing the page
+**"Transaction failed"**
+- Check you have enough DEV for gas fees
+- Ensure reward amount is included in transaction
 
-### "Transaction failed"
-- Check you have enough DEV for gas
-- Make sure contract addresses are correct in .env.local
-- Check Moonscan for error details
+## Next Steps
 
-### "Contracts not deploying"
-- Run `forge build` to check for compilation errors
-- Verify your private key is correct
-- Check your DEV balance
+- Read [Architecture](ARCHITECTURE.md) to understand how it works
+- Check [Deployment Guide](DEPLOYMENT_HACKATHON.md) to deploy your own
+- View contracts on [Moonscan](https://moonbase.moonscan.io/)
 
-## 📚 Next Steps
+## Support
 
-- Read [DEVNET_SETUP.md](./packages/contracts/DEVNET_SETUP.md) for advanced options
-- Check [MOONBASE_DEPLOYMENT.md](./packages/contracts/MOONBASE_DEPLOYMENT.md) for details
-- Explore [ARCHITECTURE.md](./docs/ARCHITECTURE.md) to understand the system
-- Join our community and share your deployment!
-
-## 💡 Tips
-
-- Keep your Anvil terminal running if testing locally
-- Use Moonscan to debug transactions
-- Test with small amounts first
-- Save your contract addresses somewhere safe
-
-## 🆘 Need Help?
-
-- Check the troubleshooting section above
-- Read the full documentation in `/docs`
-- Open an issue on GitHub
-- Ask in our community chat
-
----
-
-**Happy building! 🚀**
+- GitHub: https://github.com/Venkat5599/kairos
+- Issues: https://github.com/Venkat5599/kairos/issues
