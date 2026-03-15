@@ -160,7 +160,7 @@ Status: ✅ Public and accessible
 
 #### 2. Live Demo URL
 ```
-✅ https://kairos-frontend-lqkb.vercel.app/
+✅ https://kairos-frontend-v969.vercel.app/
 Status: ✅ Deployed and working
 ```
 

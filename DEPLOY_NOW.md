@@ -30,7 +30,7 @@ You'll get a URL like: `https://kairos-xyz.vercel.app`
 
 ## 🌐 Live Demo
 
-**Production URL**: https://kairos-frontend-lqkb.vercel.app/
+**Production URL**: https://kairos-frontend-v969.vercel.app/
 
 The app is deployed and connected to Moonbase Alpha testnet!
 
@@ -127,7 +127,7 @@ http://localhost:3000
 
 ### Minimum (Required)
 - ✅ GitHub repo: https://github.com/Venkat5599/kairos
-- ✅ Live demo: https://kairos-frontend-lqkb.vercel.app/
+- ✅ Live demo: https://kairos-frontend-v969.vercel.app/
 - ✅ Contract addresses (already deployed)
 - ✅ README with setup instructions
 
@@ -155,7 +155,7 @@ http://localhost:3000
 1. Project Name: Kairos
 2. Category: Track 2 - PVM Smart Contracts
 3. GitHub: https://github.com/Venkat5599/kairos
-4. Live Demo: https://kairos-frontend-lqkb.vercel.app/
+4. Live Demo: https://kairos-frontend-v969.vercel.app/
 5. Contracts: See README
 6. Video: [Your video URL if you made one]
 ```

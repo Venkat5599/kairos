@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kairos-frontend-lqkb.vercel.app">
+  <a href="https://kairos-frontend-v969.vercel.app">
     <img src="https://img.shields.io/badge/🔴_LIVE-Production_Demo-00D4FF?style=for-the-badge" alt="Live Demo" />
   </a>
   <a href="https://moonbase.moonscan.io/address/0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB#code">
