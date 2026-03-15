@@ -557,7 +557,7 @@ npm run start:simple
 
 ---
 
-## 🏆 Built for Polkadot Hackathon 2025
+## 🏆 Built for Polkadot Hackathon 2026
 
 **Track 2: PVM Smart Contracts**
 *"Accessing Polkadot native functionality - build with precompiles"*
