@@ -41,20 +41,9 @@ export function useNetworkStatus() {
 
         const latency = Date.now() - startTime;
 
-        // Fetch solver count from contract
-        let solverCount = 0;
-        try {
-          if (INTENT_REGISTRY_ADDRESS) {
-            const count = await publicClient.readContract({
-              address: INTENT_REGISTRY_ADDRESS,
-              abi: INTENT_REGISTRY_ABI,
-              functionName: 'solverCount',
-            }) as bigint;
-            solverCount = Number(count);
-          }
-        } catch (err) {
-          console.warn('Could not fetch solver count:', err);
-        }
+        // Note: Contract doesn't have a solverCount function
+        // We'll show 0 or could add this function to the contract later
+        const solverCount = 0;
 
         setStatus({
           latency,
