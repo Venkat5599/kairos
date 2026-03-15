@@ -29,10 +29,10 @@ contract NameRegistry {
      * @param name The name to register (3-20 chars, alphanumeric + underscore)
      */
     function registerName(string calldata name) external {
-        require(bytes(name).length >= 3, NameTooShort());
-        require(bytes(name).length <= 20, NameTooLong());
-        require(_isValidName(name), InvalidCharacters());
-        require(!nameExists[name], NameAlreadyTaken());
+        if (bytes(name).length < 3) revert NameTooShort();
+        if (bytes(name).length > 20) revert NameTooLong();
+        if (!_isValidName(name)) revert InvalidCharacters();
+        if (nameExists[name]) revert NameAlreadyTaken();
 
         string memory oldName = addressToName[msg.sender];
 
@@ -59,7 +59,7 @@ contract NameRegistry {
      */
     function releaseName() external {
         string memory name = addressToName[msg.sender];
-        require(bytes(name).length > 0, NoNameRegistered());
+        if (bytes(name).length == 0) revert NoNameRegistered();
 
         nameExists[name] = false;
         delete nameToAddress[name];

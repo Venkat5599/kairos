@@ -1,127 +1,59 @@
-# IntentFlow Indexer
+# Kairos Indexer (Work in Progress)
 
-Subsquid-based event indexer for IntentFlow protocol.
+## Status: 🚧 Under Development
 
-## Features
+This package is a Subsquid-based indexer for Kairos events. It's currently a work in progress and not required for the hackathon demo.
 
-- Real-time event indexing from Polkadot Hub
-- GraphQL API for querying indexed data
-- PostgreSQL storage
-- Automatic schema generation
+## Purpose
 
-## Events Indexed
+The indexer will eventually:
+- Index all IntentCreated, IntentClaimed, IntentCompleted events
+- Store data in PostgreSQL for fast queries
+- Provide historical data for analytics
+- Enable efficient filtering and searching
 
-- `IntentCreated` - New intent created
-- `IntentExecuting` - Intent claimed by solver
-- `IntentCompleted` - Intent successfully executed
-- `IntentFailed` - Intent execution failed
-- `SolverRegistered` - New solver registered
-- `RewardClaimed` - Solver claimed reward
+## Current State
 
-## Setup
+- ✅ Basic structure in place
+- ✅ Event decoders implemented
+- 🚧 Database models (placeholder)
+- 🚧 Full event topic mapping
+- ❌ Not deployed
+- ❌ Not tested
 
-### Prerequisites
-- Node.js 20+
-- PostgreSQL 16+
-- Docker (optional)
+## Future Work
 
-### Installation
+1. Complete database schema
+2. Add proper event topic IDs
+3. Set up PostgreSQL database
+4. Deploy to production
+5. Add GraphQL API
+6. Create analytics dashboard
+
+## Not Required for Demo
+
+The main Kairos system works without this indexer. The frontend and solver bot query the blockchain directly, which is sufficient for the hackathon demo.
+
+## To Run (When Complete)
+
 ```bash
-npm install
-```
-
-### Configuration
-
-Create `.env` file:
-```env
-POLKADOT_HUB_RPC_URL=https://polkadot-hub-rpc.example.com
-INTENT_REGISTRY_ADDRESS=0x...
-INDEXER_START_BLOCK=0
-DB_NAME=intentflow_indexer
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASS=password
-```
-
-### Generate Types
-```bash
-npm run codegen
-npm run typegen
-```
-
-### Database Setup
-```bash
-# Start PostgreSQL
+# Start database
 npm run up
 
-# Generate migration
-npm run migration:generate
+# Generate types
+npm run codegen
+npm run typegen
 
-# Apply migration
-npm run migration:apply
-```
-
-### Running
-
-Development:
-```bash
+# Run indexer
 npm run dev
 ```
 
-Production:
-```bash
-npm run build
-npm start
-```
+## Dependencies
 
-## GraphQL API
+- Subsquid SDK
+- PostgreSQL
+- TypeORM
 
-Once running, GraphQL playground available at:
-- http://localhost:4350/graphql
+---
 
-### Example Queries
-
-Get all intents:
-```graphql
-query {
-  intents(orderBy: createdAt_DESC, limit: 10) {
-    id
-    creator
-    description
-    status
-    reward
-    createdAt
-    solver {
-      address
-      reputation
-    }
-  }
-}
-```
-
-Get solver stats:
-```graphql
-query {
-  solver(id: "0x...") {
-    address
-    reputation
-    totalExecuted
-    totalFailed
-    intents {
-      id
-      status
-    }
-  }
-}
-```
-
-## Architecture
-
-```
-Blockchain Events → Processor → PostgreSQL → GraphQL API
-```
-
-## License
-
-MIT
+**Note**: This is a future enhancement and not part of the core hackathon submission.

@@ -14,6 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://rpc.api.moonbase.moonbeam.network" />
+        <link rel="dns-prefetch" href="https://rpc.api.moonbase.moonbeam.network" />
+      </head>
       <body>
         <div className="matrix-bg"></div>
         <Providers>{children}</Providers>

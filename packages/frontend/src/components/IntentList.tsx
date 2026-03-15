@@ -41,10 +41,38 @@ export default function IntentList() {
         <h4 className="text-xs font-orbitron text-slate-500 uppercase tracking-widest ml-1">
           Active Intents
         </h4>
-        <div className="glass-panel p-8 rounded border border-cyber-blue/30 text-center">
-          <div className="text-cyber-blue text-4xl mb-4">⚡</div>
-          <p className="text-slate-400 text-sm mb-2">No active intents</p>
-          <p className="text-slate-600 text-xs">Create your first intent above to get started</p>
+        <div className="glass-panel p-12 rounded border border-cyber-blue/30 text-center">
+          <div className="text-cyber-blue text-6xl mb-6 animate-pulse">⚡</div>
+          <h3 className="text-cyber-pink font-orbitron text-xl mb-3">No Active Intents</h3>
+          <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
+            Create your first intent using the terminal above. Describe what you want in natural language and let the solver bots execute it automatically!
+          </p>
+          <div className="space-y-3 text-left max-w-md mx-auto bg-black/40 p-4 rounded border border-cyber-blue/20">
+            <p className="text-xs font-orbitron text-cyber-blue uppercase">Example Intents:</p>
+            <div className="space-y-2 text-xs text-slate-400 font-mono">
+              <div className="flex items-start space-x-2">
+                <span className="text-cyber-green">→</span>
+                <span>send 0.01 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-cyber-green">→</span>
+                <span>Bridge 0.1 DEV to Ethereum 0x1234...</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-cyber-green">→</span>
+                <span>Transfer 0.05 DEV to 0xabcd...</span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="mt-6 px-6 py-3 bg-cyber-blue/20 hover:bg-cyber-blue/30 border border-cyber-blue text-cyber-blue font-orbitron font-bold rounded transition-all group"
+          >
+            <span className="flex items-center space-x-2">
+              <span>CREATE INTENT</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+          </button>
         </div>
       </div>
     );
@@ -78,6 +106,23 @@ export default function IntentList() {
     }
   };
 
+  // Detect if intent is cross-chain
+  const isCrossChain = (description: string) => {
+    const crossChainKeywords = /bridge|polkadot|ethereum|astar|moonriver|from\s+\w+\s+to\s+\w+/i;
+    return crossChainKeywords.test(description);
+  };
+
+  // Extract destination chain from description
+  const getDestinationChain = (description: string) => {
+    const chains = ['Polkadot', 'Ethereum', 'Astar', 'Moonriver', 'Moonbeam'];
+    for (const chain of chains) {
+      if (description.toLowerCase().includes(chain.toLowerCase())) {
+        return chain;
+      }
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-4">
       <h4 className="text-xs font-orbitron text-slate-500 uppercase tracking-widest ml-1">
@@ -87,6 +132,8 @@ export default function IntentList() {
       {intents.map((intent) => {
         const color = getStatusColor(intent.status);
         const progress = getProgress(intent.status);
+        const crossChain = isCrossChain(intent.description);
+        const destinationChain = getDestinationChain(intent.description);
         
         return (
           <div
@@ -105,7 +152,7 @@ export default function IntentList() {
               <div className="flex-1">
                 <div className="flex items-center space-x-4 mb-1">
                   <span className="text-xs font-mono text-white">
-                    INTENT #{intent.id} |{' '}
+                    INTENT #{intent.id.slice(0, 8)}... |{' '}
                     <span
                       className={
                         color === 'pink'
@@ -120,6 +167,13 @@ export default function IntentList() {
                       {intent.status}
                     </span>
                   </span>
+                  {crossChain && (
+                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded text-[9px] text-purple-300 font-orbitron">
+                      <span>🌉</span>
+                      <span>CROSS-CHAIN</span>
+                      {destinationChain && <span>→ {destinationChain.toUpperCase()}</span>}
+                    </span>
+                  )}
                 </div>
                 <p className="text-[10px] text-slate-400 italic mb-1">{intent.description}</p>
                 <div className="flex items-center space-x-4 text-[9px] text-slate-500">

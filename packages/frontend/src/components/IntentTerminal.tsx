@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, memo } from 'react';
 import { useAccount } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { useCreateIntent } from '@/hooks/useContracts';
-import { useResolveName } from '@/hooks/useNameRegistry';
-import { intentApi } from '@/lib/api';
 import { parseIntentCommand, validateIntentParams, isName, isAddress } from '@/lib/utils';
 import { DEFAULT_DEADLINE_HOURS } from '@/lib/constants';
 
@@ -14,32 +12,12 @@ interface IntentTerminalProps {
   onIntentCreated?: () => void;
 }
 
-export default function IntentTerminal({ onIntentCreated }: IntentTerminalProps) {
+const IntentTerminal = memo(function IntentTerminal({ onIntentCreated }: IntentTerminalProps) {
   const { address, isConnected } = useAccount();
-  const [command, setCommand] = useState('send 20 USDC to Alice on Moonbeam');
+  const [command, setCommand] = useState('send 0.01 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [resolvedRecipient, setResolvedRecipient] = useState<string | null>(null);
 
   const { createIntent, hash, isPending, isConfirming, isConfirmed, error } = useCreateIntent();
-
-  // Parse command to extract recipient
-  const { recipient } = parseIntentCommand(command);
-
-  // Resolve name if recipient looks like a name
-  const { data: resolvedAddress } = useResolveName(
-    recipient && isName(recipient) ? recipient : undefined
-  );
-
-  // Update resolved recipient when address changes
-  useEffect(() => {
-    if (recipient && isName(recipient) && resolvedAddress) {
-      setResolvedRecipient(resolvedAddress as string);
-    } else if (recipient && isAddress(recipient)) {
-      setResolvedRecipient(recipient);
-    } else {
-      setResolvedRecipient(null);
-    }
-  }, [recipient, resolvedAddress]);
 
   const handleExecute = async () => {
     if (!isConnected || !address) {
@@ -49,14 +27,8 @@ export default function IntentTerminal({ onIntentCreated }: IntentTerminalProps)
 
     const { description, estimatedReward, recipient } = parseIntentCommand(command);
 
-    // Check if recipient is a name and needs resolution
-    if (recipient && isName(recipient)) {
-      if (!resolvedAddress || resolvedAddress === '0x0000000000000000000000000000000000000000') {
-        toast.error(`Name "${recipient}" not found. Please register it first.`);
-        return;
-      }
-      toast.success(`Resolved "${recipient}" to ${(resolvedAddress as string).slice(0, 10)}...`);
-    }
+    // Note: Cross-chain intents are supported! The solver bot will handle them.
+    // No need to validate recipient format here - let the solver parse it.
 
     const deadline = Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_HOURS * 3600;
 
@@ -96,55 +68,27 @@ export default function IntentTerminal({ onIntentCreated }: IntentTerminalProps)
     }
   };
 
-  useEffect(() => {
-    if (isPending) {
-      toast.loading('Confirm transaction in wallet...', { id: 'intent-tx' });
-    }
-  }, [isPending]);
+  // Handle transaction states
+  if (isPending && !isProcessing) {
+    setIsProcessing(true);
+    toast.loading('Confirm transaction in wallet...', { id: 'intent-tx' });
+  }
 
-  useEffect(() => {
-    if (isConfirming) {
-      toast.loading('Transaction confirming...', { id: 'intent-tx' });
-    }
-  }, [isConfirming]);
+  if (isConfirming && isProcessing) {
+    toast.loading('Transaction confirming...', { id: 'intent-tx' });
+  }
 
-  useEffect(() => {
-    const syncToBackend = async () => {
-      if (isConfirmed && hash && address) {
-        try {
-          const { description, estimatedReward } = parseIntentCommand(command);
-          const deadline = Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_HOURS * 3600;
+  if (isConfirmed && isProcessing) {
+    toast.success('Intent created successfully!', { id: 'intent-tx' });
+    setCommand('');
+    setIsProcessing(false);
+    onIntentCreated?.();
+  }
 
-          await intentApi.create({
-            chainId: 1287,
-            creator: address,
-            description,
-            reward: parseEther(estimatedReward).toString(),
-            deadline,
-            txHash: hash,
-          });
-
-          toast.success('Intent created successfully!', { id: 'intent-tx' });
-          setCommand('');
-          onIntentCreated?.();
-        } catch (err) {
-          console.error('Backend sync error:', err);
-          toast.success('Intent created on-chain!', { id: 'intent-tx' });
-        } finally {
-          setIsProcessing(false);
-        }
-      }
-    };
-
-    syncToBackend();
-  }, [isConfirmed, hash, address, command, onIntentCreated]);
-
-  useEffect(() => {
-    if (error) {
-      setIsProcessing(false);
-      toast.dismiss('intent-tx');
-    }
-  }, [error]);
+  if (error && isProcessing) {
+    setIsProcessing(false);
+    toast.dismiss('intent-tx');
+  }
 
   return (
     <div className="glass-panel rounded-lg overflow-hidden blue-glow-border">
@@ -189,26 +133,9 @@ export default function IntentTerminal({ onIntentCreated }: IntentTerminalProps)
             </svg>
           </button>
         </div>
-
-        {/* Show resolved recipient if name is detected */}
-        {recipient && isName(recipient) && (
-          <div className="text-xs">
-            {resolvedAddress && resolvedAddress !== '0x0000000000000000000000000000000000000000' ? (
-              <div className="flex items-center space-x-2 text-cyber-green">
-                <span>✓</span>
-                <span>
-                  "{recipient}" resolves to {(resolvedAddress as string).slice(0, 10)}...{(resolvedAddress as string).slice(-8)}
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2 text-red-400">
-                <span>✗</span>
-                <span>Name "{recipient}" not found</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
-}
+});
+
+export default IntentTerminal;

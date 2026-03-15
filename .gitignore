@@ -50,7 +50,7 @@ Thumbs.db
 cache/
 out/
 broadcast/
-lib/
+packages/contracts/lib/
 
 # Prisma
 packages/backend/prisma/migrations/

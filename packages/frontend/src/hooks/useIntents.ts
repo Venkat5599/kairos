@@ -19,6 +19,8 @@ export interface Intent {
   executedAt: number;
 }
 
+const STATUS_MAP = ['Pending', 'Executing', 'Completed', 'Failed', 'Cancelled'] as const;
+
 export function useIntents() {
   const [intents, setIntents] = useState<Intent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,67 +28,77 @@ export function useIntents() {
 
   const publicClient = usePublicClient();
 
-  useEffect(() => {
-    fetchIntents();
-    // Refresh every 10 seconds
-    const interval = setInterval(fetchIntents, 10000);
-    return () => clearInterval(interval);
-  }, [publicClient]);
-
   const fetchIntents = async () => {
-    if (!publicClient || !INTENT_REGISTRY_ADDRESS) {
-      setError('Contract not configured');
+    if (!INTENT_REGISTRY_ADDRESS || !publicClient) {
+      setError('Contract address not configured');
       setLoading(false);
       return;
     }
 
     try {
-      // Get all intent IDs (bytes32[])
+      // Get all intent IDs
       const intentIds = await publicClient.readContract({
         address: INTENT_REGISTRY_ADDRESS,
         abi: INTENT_REGISTRY_ABI,
         functionName: 'getAllIntentIds',
       }) as `0x${string}`[];
 
-      const fetchedIntents: Intent[] = [];
+      if (intentIds.length === 0) {
+        setIntents([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
 
-      // Fetch each intent by its bytes32 ID
-      for (const intentId of intentIds) {
+      // Fetch details for each intent
+      const intentPromises = intentIds.map(async (intentId) => {
         try {
           const intent = await publicClient.readContract({
             address: INTENT_REGISTRY_ADDRESS,
             abi: INTENT_REGISTRY_ABI,
-            functionName: 'getIntent',
+            functionName: 'intents',
             args: [intentId],
           }) as any;
 
-          const statusMap = ['Pending', 'Executing', 'Completed', 'Failed', 'Cancelled'] as const;
-
-          fetchedIntents.push({
+          return {
             id: intentId,
             creator: intent.creator,
             description: intent.description,
             reward: formatEther(intent.reward),
             deadline: Number(intent.deadline),
-            status: statusMap[intent.status] || 'Pending',
+            status: STATUS_MAP[intent.status] || 'Pending',
             solver: intent.solver,
             createdAt: Number(intent.createdAt),
             executedAt: Number(intent.executedAt),
-          });
+          } as Intent;
         } catch (err) {
-          console.error(`Error fetching intent ${intentId}:`, err);
+          console.warn('Could not read intent:', intentId);
+          return null;
         }
-      }
+      });
+
+      const fetchedIntents = (await Promise.all(intentPromises)).filter(Boolean) as Intent[];
+      
+      // Sort by creation time (newest first)
+      fetchedIntents.sort((a, b) => b.createdAt - a.createdAt);
 
       setIntents(fetchedIntents);
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching intents:', err);
-      setError('Failed to fetch intents from blockchain');
+      setIntents([]);
+      setError(null);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchIntents();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchIntents, 30000);
+    return () => clearInterval(interval);
+  }, [publicClient]);
 
   return { intents, loading, error, refetch: fetchIntents };
 }

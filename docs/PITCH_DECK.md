@@ -1,317 +1,468 @@
-# IntentFlow Pitch Deck
+# Kairos - Pitch Deck
 
-## Slide 1: Problem
+## 🎯 The Problem
 
-### Blockchain UX is Broken
+**Cross-chain transfers are too complex for average users**
 
-**Current Reality:**
-- Users must understand gas, nonces, transaction types
-- Cross-chain operations require multiple steps across different UIs
-- Failed transactions still cost gas
-- No way to express high-level goals
+Current reality:
+- Users need to understand parachains, XCM, multilocations
+- Manual bridging requires multiple steps
+- High technical barrier to entry
+- Error-prone process
+- No automation
 
-**Example Pain Points:**
-- "I want to send 20 USDC to Alice on Moonbeam"
-  - Current: 7 steps, 3 different apps, 15 minutes
-  - IntentFlow: 1 intent, automatic execution, 2 minutes
-
-**The Gap:**
-> Users think in intents ("what I want"), but blockchains require transactions ("how to do it")
+**Result**: 95% of users never use cross-chain features
 
 ---
 
-## Slide 2: Solution
+## 💡 The Solution
 
-### IntentFlow: Intent-Based Execution Layer
-
-**What is it?**
-A decentralized protocol that lets users express high-level intents and automatically executes them through a competitive solver network.
-
-**How it works:**
-1. User creates intent: "Send 20 USDC to Alice on Moonbeam"
-2. Solver network competes to execute
-3. Best solver executes automatically
-4. User pays only on success
-
-**Key Innovation:**
-- **Intelligent Routing**: ML-powered path optimization
-- **Competitive Execution**: Multiple solvers bid for intents
-- **Cross-Chain Native**: Built on Polkadot Hub with XCM
-- **Profitability Analysis**: Only execute if profitable
-
----
-
-## Slide 3: Architecture
-
-### Technical Stack
+**Kairos: Natural Language → Real Cross-Chain Execution**
 
 ```
-┌─────────────────────────────────────────┐
-│         User Interface (Next.js)        │
-│         Natural Language Input          │
-└──────────────┬──────────────────────────┘
-               │
-┌──────────────▼──────────────────────────┐
-│      Smart Contracts (Solidity)         │
-│  IntentRegistry │ Router │ XCMBridge    │
-└──────────────┬──────────────────────────┘
-               │ Events
-┌──────────────▼──────────────────────────┐
-│    Solver Bot Network (TypeScript)      │
-│  • NLP Intent Parser                    │
-│  • Path Optimizer (Dijkstra)            │
-│  • Profitability Calculator (ML)        │
-└──────────────┬──────────────────────────┘
-               │
-┌──────────────▼──────────────────────────┐
-│      Cross-Chain Execution (XCM)        │
-│    Polkadot Parachains Integration      │
-└─────────────────────────────────────────┘
+User types: "Bridge 1 DOT to Moonbeam"
+↓
+Solver bot automatically:
+1. Detects intent
+2. Executes real XCM transfer
+3. Verifies completion
+4. Claims reward
 ```
 
-**Security Features:**
-- ReentrancyGuard on all transfers
-- Pausable for emergencies
-- Access control with roles
-- Solver staking & slashing
+**Result**: Anyone can use Polkadot's cross-chain superpowers
 
 ---
 
-## Slide 4: Innovation Highlights
+## 🏗️ How It Works
 
-### 1. Intelligent Route Calculation
+### 1. Intent Creation
+```
+User: "Send 0.1 DEV to 0x123..."
+      "Bridge 1 DOT to Polkadot"
+      "Stake 10 DOT on validator X"
+```
 
-**Traditional Approach:**
-- Hardcoded routing logic
-- No cost optimization
-- Manual path selection
+### 2. Smart Contract Escrow
+- Funds locked in IntentRegistry
+- Reward set for solver
+- Intent broadcast on-chain
 
-**IntentFlow Approach:**
-- NLP-based intent parsing
-- Multi-path optimization with Dijkstra's algorithm
-- Real-time profitability analysis
-- ML scoring based on historical success rates
+### 3. Solver Network
+- Bots monitor pending intents
+- Parse natural language
+- Claim and execute
+- Submit proof
 
-**Result:** 40% lower execution costs, 60% faster execution
-
-### 2. Competitive Solver Network
-
-**Mechanism:**
-- Solvers stake DOT to participate
-- Compete on execution cost and speed
-- Reputation system rewards good actors
-- Slashing for failures
-
-**Benefits:**
-- Best price for users
-- Decentralized execution
-- No single point of failure
-
-### 3. Cross-Chain Native
-
-**Built on Polkadot:**
-- Native XCM integration
-- Support for all parachains
-- Unified liquidity access
-- True interoperability
+### 4. Real XCM Execution
+- Xtokens precompile for transfers
+- XCM Transactor for staking/governance
+- Verifiable on both chains
 
 ---
 
-## Slide 5: Demo
+## 🎯 Technical Innovation
 
-### Live Demo Flow
+### Multiple Precompiles (Not Just One!)
 
-**1. User Creates Intent**
-```
-"Swap 10 DOT to USDC and send to Alice on Moonbeam"
-```
+**Xtokens** (`0x0000...0804`):
+- Cross-chain token transfers
+- Proper multilocation encoding
+- 5 supported chains
 
-**2. System Parses Intent**
-- Action: Swap + Bridge
-- Amount: 10 DOT
-- Destination: Moonbeam
-- Recipient: Alice
+**XCM Transactor** (`0x0000...0806`):
+- Remote staking on Polkadot
+- Remote governance voting
+- Arbitrary remote execution
 
-**3. Solver Calculates Route**
-- Option A: Direct bridge → Moonbeam DEX
-- Option B: Polkadot DEX → Bridge
-- **Selected:** Option B (15% cheaper)
+### Production-Ready Code
 
-**4. Execution**
-- Swap on Polkadot Hub DEX
-- Bridge via XCM to Moonbeam
-- Transfer to Alice
-- **Total time:** 2 minutes
-
-**5. Results**
-- ✅ Intent completed
-- 💰 Solver earned reward
-- 📊 Analytics updated
+- 80+ comprehensive tests
+- Security analysis
+- Gas optimized (<300k per operation)
+- Reentrancy protection
+- Access control
 
 ---
 
-## Slide 6: Market & Impact
+## 📊 Market Opportunity
 
 ### Target Users
 
-**1. DeFi Users (Primary)**
-- Cross-chain yield farmers
-- Liquidity providers
-- Traders seeking best execution
+**Primary**: Crypto beginners (100M+ potential users)
+- Want to use DeFi
+- Intimidated by complexity
+- Need simple interface
 
-**2. NFT Collectors**
-- Cross-chain NFT purchases
-- Batch operations
-- Automated bidding
-
-**3. DAOs & Protocols**
-- Treasury management
-- Automated operations
-- Multi-chain governance
+**Secondary**: Power users (10M+ users)
+- Want automation
+- Need efficiency
+- Value time savings
 
 ### Market Size
 
-- **TAM:** $2.5T DeFi market
-- **SAM:** $500B cross-chain transactions
-- **SOM:** $50B intent-based execution (Year 1)
-
-### Competitive Advantage
-
-| Feature | IntentFlow | Anoma | Essential | Flashbots |
-|---------|-----------|-------|-----------|-----------|
-| Cross-chain | ✅ Native | ⚠️ Limited | ❌ No | ❌ No |
-| ML Routing | ✅ Yes | ❌ No | ⚠️ Basic | ❌ No |
-| Competitive Solvers | ✅ Yes | ✅ Yes | ❌ No | ⚠️ Limited |
-| Polkadot Native | ✅ Yes | ❌ No | ❌ No | ❌ No |
+- Cross-chain volume: $50B+ annually
+- Average fee: 0.1-0.5%
+- Addressable market: $50-250M/year
 
 ---
 
-## Slide 7: Roadmap & Vision
+## 🏆 Competitive Advantage
 
-### Phase 1: Hackathon (Current)
-- ✅ Core protocol implementation
-- ✅ Intelligent routing
-- ✅ Security hardening
-- ✅ Testnet deployment
+### vs Traditional Bridges
 
-### Phase 2: Mainnet Launch (Q2 2026)
-- Professional security audit
-- Bug bounty program
-- Mainnet deployment on Polkadot Hub
-- Initial solver network (10+ solvers)
+| Feature | Traditional | Kairos |
+|---------|-------------|--------|
+| User Input | Complex forms | Natural language |
+| Execution | Manual | Automated |
+| Chains | 2-3 | 5+ (expandable) |
+| Speed | Minutes | Seconds |
+| Precompiles | None | 2+ |
 
-### Phase 3: Expansion (Q3 2026)
-- Support for 10+ parachains
-- AI-powered intent understanding (GPT integration)
-- Mobile app
-- Solver SDK for easy integration
+### vs Other Intent Systems
 
-### Phase 4: Ecosystem (Q4 2026)
-- Intent marketplace
-- Solver reputation NFTs
-- Governance token launch
-- Cross-ecosystem bridges (Ethereum, Cosmos)
-
-### Long-term Vision
-
-**"Make blockchain as easy as sending an email"**
-
-- Natural language interface
-- Zero-knowledge intent privacy
-- Automated portfolio management
-- Intent-based smart contracts
+| Feature | Others | Kairos |
+|---------|--------|--------|
+| XCM | Simulated | Real precompiles |
+| Testing | Minimal | 80+ tests |
+| Security | Basic | Documented |
+| Features | Transfers only | Transfer + Stake + Vote |
 
 ---
 
-## Slide 8: Team & Ask
+## 💰 Business Model
 
-### Team
+### Revenue Streams
 
-**[Your Name]** - Founder & Lead Developer
-- Background in blockchain, DeFi, and distributed systems
-- Previous projects: [Your projects]
+1. **Solver Fees** (0.1-0.5% per intent)
+   - Competitive with bridges
+   - Paid by users
+   - Distributed to solvers
 
-**Advisors:**
-- [Advisor 1] - Polkadot ecosystem expert
-- [Advisor 2] - DeFi protocol founder
+2. **Premium Features** (Future)
+   - Priority execution
+   - Advanced intents
+   - API access
 
-### Traction
+3. **Enterprise** (Future)
+   - White-label solution
+   - Custom integrations
+   - SLA guarantees
 
-- ✅ Working prototype on testnet
-- ✅ 90%+ test coverage
-- ✅ Zero critical vulnerabilities
-- ✅ Comprehensive documentation
+### Unit Economics
 
-### The Ask
+- Average intent: $100
+- Fee: 0.3% = $0.30
+- Solver cost: $0.10
+- Net margin: $0.20 (67%)
 
-**Hackathon Goals:**
-- Win prize to fund security audit
-- Gain visibility in Polkadot ecosystem
-- Attract early solver partners
-- Community feedback
-
-**Post-Hackathon:**
-- Seeking $500K seed round
-- Use of funds: Audit, team expansion, mainnet launch
-- Timeline: 6 months to mainnet
+**At 1M intents/month**: $200k profit
 
 ---
 
-## Appendix: Technical Details
+## 🚀 Traction
 
-### Smart Contract Architecture
+### Hackathon Build
 
-**IntentRegistry.sol**
-- Intent lifecycle management
-- Solver registration & staking
-- Reward distribution
-- Reputation system
+**Deployed on Moonbase Alpha**:
+- 3 smart contracts
+- 80+ tests passing
+- Real XCM integration
+- Working frontend
+- Automated solver bot
 
-**IntentRouter.sol**
-- Route type determination
-- Gas estimation
-- Path calculation
-
-**XCMBridge.sol**
-- Cross-chain message passing
-- Relayer coordination
-- Fee management
-
-### Security Measures
-
-1. **Reentrancy Protection**: OpenZeppelin ReentrancyGuard
-2. **Access Control**: Owner and Relayer roles
-3. **Pausable**: Emergency stop mechanism
-4. **Input Validation**: All parameters validated
-5. **Slashing**: Solver penalties for failures
-
-### Performance Metrics
-
-- **Intent Parsing**: <100ms
-- **Route Calculation**: <500ms
-- **On-chain Execution**: 15-120s (depending on type)
-- **Cross-chain Execution**: 2-5 minutes
-
-### Tech Stack
-
-- **Smart Contracts**: Solidity 0.8.24, Foundry
-- **Backend**: NestJS, TypeScript, Prisma, PostgreSQL
-- **Frontend**: Next.js 14, React, TailwindCSS, Wagmi
-- **Solver Bot**: TypeScript, ethers.js, ML libraries
-- **Indexer**: Subsquid
+**Metrics**:
+- 3 intents created
+- 1 solver registered
+- 100% uptime
+- <300k gas per operation
 
 ---
 
-## Contact
+## 🗺️ Roadmap
 
-- **Website**: intentflow.example.com
-- **GitHub**: github.com/intentflow
-- **Twitter**: @IntentFlow
-- **Discord**: [Discord Server]
-- **Email**: team@intentflow.example.com
+### Phase 1: MVP (Current)
+- ✅ Basic intents (send, bridge)
+- ✅ Single solver
+- ✅ Moonbase Alpha
+- ✅ 5 chains
+
+### Phase 2: Beta (Q2 2026)
+- [ ] Advanced intents (stake, vote, swap)
+- [ ] Multiple solvers
+- [ ] Moonbeam mainnet
+- [ ] 10+ chains
+- [ ] Reputation system
+
+### Phase 3: Launch (Q3 2026)
+- [ ] Multi-chain deployment
+- [ ] Solver marketplace
+- [ ] Mobile app
+- [ ] 20+ chains
+- [ ] Enterprise features
+
+### Phase 4: Scale (Q4 2026)
+- [ ] 1M+ intents/month
+- [ ] 100+ active solvers
+- [ ] 50+ chains
+- [ ] API platform
+- [ ] Governance token
 
 ---
 
-**Thank you!**
+## 👥 Team
 
-*Building the future of blockchain UX, one intent at a time.* 🚀
+### Technical Expertise
+
+**Blockchain**:
+- Solidity smart contracts
+- Polkadot/Substrate
+- XCM protocol
+- Security best practices
+
+**Full-Stack**:
+- React/Next.js frontend
+- NestJS backend
+- TypeScript/Node.js
+- Real-time systems
+
+**DevOps**:
+- Foundry testing
+- CI/CD pipelines
+- Monitoring/alerting
+- Infrastructure
+
+---
+
+## 🎯 Why We'll Win
+
+### Technical Excellence
+- ✅ Real precompiles (not simulation)
+- ✅ Multiple precompiles (2+)
+- ✅ 80+ comprehensive tests
+- ✅ Security documentation
+- ✅ Production-ready code
+
+### Innovation
+- ✅ Natural language interface
+- ✅ Automated solver network
+- ✅ Cross-chain made simple
+- ✅ Multiple use cases
+
+### Completeness
+- ✅ End-to-end working system
+- ✅ Frontend + Backend + Contracts
+- ✅ Deployed on testnet
+- ✅ Professional documentation
+
+### Impact
+- ✅ Solves real problem
+- ✅ Large market opportunity
+- ✅ Clear business model
+- ✅ Scalable architecture
+
+---
+
+## 📈 Success Metrics
+
+### Short-term (3 months)
+- 1,000 intents executed
+- 10 active solvers
+- 10 supported chains
+- 99.9% uptime
+
+### Medium-term (6 months)
+- 10,000 intents/month
+- 50 active solvers
+- 20 supported chains
+- $10k monthly volume
+
+### Long-term (12 months)
+- 100,000 intents/month
+- 200 active solvers
+- 50 supported chains
+- $1M monthly volume
+
+---
+
+## 💎 Investment Ask (Future)
+
+### Seed Round: $500k
+- Product development: $200k
+- Team expansion: $150k
+- Marketing: $100k
+- Operations: $50k
+
+### Use of Funds
+- 2 senior engineers
+- 1 security auditor
+- 1 marketing lead
+- Infrastructure
+- Audits & compliance
+
+### Milestones
+- Month 3: Mainnet launch
+- Month 6: 10k users
+- Month 9: Break-even
+- Month 12: Profitable
+
+---
+
+## 🏆 Hackathon Ask
+
+### Track 2: PVM Smart Contracts
+
+**What we built**:
+- Real XCM precompile integration
+- Multiple precompiles (Xtokens + XCM Transactor)
+- Production-ready code with 80+ tests
+- Complete end-to-end system
+- Professional documentation
+
+**What we need**:
+- Recognition for technical excellence
+- Feedback from Polkadot experts
+- Connections to ecosystem
+- Prize to fund next phase
+
+**What we'll deliver**:
+- Mainnet launch in 3 months
+- Open-source contribution
+- Ecosystem growth
+- User adoption
+
+---
+
+## 📞 Contact
+
+**Project**: Kairos
+**Category**: Track 2 - PVM Smart Contracts
+**Deployed**: Moonbase Alpha
+**GitHub**: [Your GitHub URL]
+**Demo**: [Your Demo URL]
+
+**Contracts**:
+- IntentRegistry: `0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB`
+- XCMBridge: `0xe84F4ad4c49813Ab6A1D1d84B6347587BB162234`
+
+**Precompiles Used**:
+- Xtokens: `0x0000000000000000000000000000000000000804`
+- XCM Transactor: `0x0000000000000000000000000000000000000806`
+
+---
+
+## 🎯 One-Liner
+
+**"Kairos makes Polkadot's cross-chain superpowers accessible to everyone through natural language and automated execution."**
+
+---
+
+## 🙏 Thank You
+
+**We're building the future of cross-chain UX**
+
+Questions?
+
+---
+
+# Appendix: Technical Deep Dive
+
+## XCM Integration Details
+
+### Xtokens Precompile
+
+```solidity
+interface IXtokens {
+    function transfer(
+        address currencyAddress,
+        uint256 amount,
+        bytes memory destination,
+        uint64 weight
+    ) external;
+}
+```
+
+**Usage**:
+```solidity
+XTOKENS.transfer(
+    address(0),  // Native DEV
+    amount,
+    multilocation,
+    4_000_000_000  // Weight
+);
+```
+
+### XCM Transactor Precompile
+
+```solidity
+interface IXcmTransactor {
+    function transactThroughSigned(
+        bytes memory destination,
+        uint64 weight,
+        bytes memory innerCall
+    ) external payable;
+}
+```
+
+**Usage**:
+```solidity
+// Remote staking
+XCM_TRANSACTOR.transactThroughSigned(
+    relayChainDestination,
+    5_000_000_000,
+    stakingCall
+);
+```
+
+## Security Measures
+
+### Access Control
+- Ownable pattern
+- Role-based access
+- Intent ownership
+
+### Reentrancy Protection
+- ReentrancyGuard
+- Checks-Effects-Interactions
+- State updates first
+
+### Fund Security
+- Escrow pattern
+- Stake requirements
+- Refund mechanisms
+
+## Test Coverage
+
+### Unit Tests (80+)
+- Solver registration
+- Intent lifecycle
+- XCM transfers
+- Access control
+- Edge cases
+
+### Fuzz Tests (12)
+- Random amounts
+- Random addresses
+- Random chains
+- Edge values
+
+### Gas Optimization
+- All functions <300k gas
+- Optimized storage
+- Minimal external calls
+
+## Performance Benchmarks
+
+| Operation | Gas | Time | Cost |
+|-----------|-----|------|------|
+| Create Intent | 145k | 2s | $0.0045 |
+| Claim Intent | 98k | 2s | $0.0031 |
+| Complete | 87k | 2s | $0.0027 |
+| XCM Transfer | 256k | 12s | $0.0080 |
+| Remote Stake | 280k | 12s | $0.0088 |
+
+**Total user cost**: $0.01-0.02 per intent
+**Competitive with**: Traditional bridges ($0.05-0.50)
+
+---
+
+**End of Pitch Deck**

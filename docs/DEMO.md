@@ -1,453 +1,259 @@
-# IntentFlow Demo Guide
+# Kairos - Demo Presentation Guide
 
-## Quick Start (5 Minutes)
+## 🎯 The Problem We're Solving
 
-This guide will help you run a complete demo of IntentFlow in 5 minutes.
+**Traditional blockchain is too complex for users:**
+- Need to understand which chain to use
+- Must know which DEX has best rates
+- Have to manually bridge assets
+- Complex transaction building
+- Gas optimization headaches
+- No automation
 
-### Prerequisites
+**Example:** To swap DOT to USDC on Moonbeam:
+1. Bridge DOT from Polkadot to Moonbeam
+2. Find best DEX (Stellaswap? Beamswap?)
+3. Check liquidity and slippage
+4. Approve token spending
+5. Execute swap
+6. Monitor transaction
+7. Handle failures manually
 
-- Node.js 20+
-- Docker & Docker Compose
-- Git
-- 10 GB free disk space
+## 💡 The Kairos Solution
 
-### Step 1: Clone and Setup (2 minutes)
+**Intent-Based Execution:**
+- Users say WHAT they want, not HOW to do it
+- Solver bots compete to execute optimally
+- Cross-chain operations handled automatically
+- Best execution guaranteed
+- Users just wait for completion
 
-```bash
-# Clone repository
-git clone https://github.com/your-org/intentflow.git
-cd intentflow
-
-# Install dependencies
-npm install
-
-# Setup environment
-cp .env.example .env
-
-# Start services (PostgreSQL, Redis)
-docker-compose up -d
-
-# Wait for services to be ready
-sleep 10
-```
-
-### Step 2: Deploy Contracts (1 minute)
-
-```bash
-# Note: Requires Foundry installed
-cd packages/contracts
-
-# Deploy to local testnet (or use pre-deployed addresses)
-forge script script/Deploy.s.sol --rpc-url localhost --broadcast
-
-# Copy deployed addresses to .env
-# INTENT_REGISTRY_ADDRESS=0x...
-# INTENT_ROUTER_ADDRESS=0x...
-# XCM_BRIDGE_ADDRESS=0x...
-```
-
-### Step 3: Start Services (1 minute)
-
-```bash
-# Terminal 1: Start backend
-cd packages/backend
-npm run start:dev
-
-# Terminal 2: Start frontend
-cd packages/frontend
-npm run dev
-
-# Terminal 3: Start solver bot
-cd packages/solver-bot
-npm run start:dev
-```
-
-### Step 4: Run Demo (1 minute)
-
-1. Open browser: http://localhost:3000
-2. Connect wallet (MetaMask)
-3. Create intent: "Send 20 USDC to Alice"
-4. Watch solver execute automatically
-5. View results in analytics dashboard
+**Same example with Kairos:**
+1. Type: "Swap DOT to USDC on Moonbeam"
+2. Click Execute
+3. Done! ✨
 
 ---
 
-## Detailed Demo Script
+## 🎬 Live Demo Script
 
-### Demo Scenario 1: Simple Transfer
+### Part 1: Introduction (2 minutes)
 
-**Goal:** Show basic intent creation and execution
+**Show the UI:**
+"This is Kairos - an intent-based execution layer for Polkadot. Notice the cyberpunk aesthetic - we're building the future of blockchain UX."
 
-**Steps:**
+**Point out key elements:**
+- Terminal-style intent input
+- Real-time stats from blockchain
+- Active intents list
+- System guardian (protocol avatar)
 
-1. **Open Frontend**
-   ```
-   Navigate to: http://localhost:3000
-   ```
+### Part 2: The Workflow (3 minutes)
 
-2. **Connect Wallet**
-   - Click "Connect Wallet"
-   - Select MetaMask
-   - Approve connection
+**Explain the architecture:**
 
-3. **Create Intent**
-   - Description: "Send 20 USDC to Alice"
-   - Reward: 0.01 DOT
-   - Click "Create Intent"
-   - Approve transaction
-
-4. **Watch Execution**
-   - Intent appears in "Recent Intents" list
-   - Status changes: Pending → Executing → Completed
-   - Time: ~30 seconds
-
-5. **View Results**
-   - Check analytics dashboard
-   - See solver reward
-   - View transaction details
-
-**Expected Output:**
 ```
-✅ Intent Created: 0x123...
-⏳ Solver Executing...
-✅ Completed in 28 seconds
-💰 Solver earned 0.01 DOT
+User Intent → Smart Contract → Solver Bots → Execution → Reward
 ```
+
+1. **User creates intent**
+   - Natural language: "Send 20 USDC to Alice"
+   - Sets reward for solvers
+   - Submits to blockchain
+
+2. **Intent stored on-chain**
+   - IntentRegistry contract records it
+   - Event emitted: IntentCreated
+   - Visible on Moonscan
+
+3. **Solvers compete**
+   - Bots listen for new intents
+   - Calculate optimal execution paths
+   - Consider gas, routes, timing
+   - Best solver executes
+
+4. **Execution & reward**
+   - Solver performs the transaction
+   - Contract verifies completion
+   - Solver receives reward + reputation boost
+   - User gets their result
+
+### Part 3: Live Demo (5 minutes)
+
+#### Step 1: Connect Wallet
+```
+1. Click "Connect Wallet"
+2. Select MetaMask
+3. Approve connection
+4. Show you're on Moonbase Alpha
+```
+
+**Say:** "I'm connected to Moonbase Alpha testnet with some DEV tokens."
+
+#### Step 2: Show Current Stats
+```
+Point to the stats cards:
+- Total Intents: X (real number from blockchain)
+- Completed: Y
+- Success Rate: Z%
+```
+
+**Say:** "These are real stats from our deployed contracts on Moonbase Alpha."
+
+#### Step 3: Create an Intent
+```
+1. Type in terminal: "Send 0.1 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+2. Set reward: 0.01 DEV
+3. Click "EXECUTE"
+4. Approve in MetaMask
+```
+
+**Say:** "I'm creating an intent to send 0.1 DEV. I'm offering 0.01 DEV as a reward for the solver who executes this."
+
+#### Step 4: Show Transaction
+```
+1. Wait for transaction confirmation
+2. Copy transaction hash
+3. Open Moonscan: https://moonbase.moonscan.io
+4. Paste transaction hash
+5. Show the transaction details
+```
+
+**Say:** "Here's the proof - this intent is now on the blockchain. Any solver can pick it up and execute it."
+
+#### Step 5: Show Intent in List
+```
+1. Scroll to "Active Intents" section
+2. Point to your newly created intent
+3. Show status: "Pending"
+4. Show reward amount
+```
+
+**Say:** "Our intent appears here with status 'Pending'. Solver bots are now competing to execute this optimally."
+
+### Part 4: Technical Deep Dive (3 minutes)
+
+**Show the contracts on Moonscan:**
+
+1. **IntentRegistry** (0x980f64d3B8e69Fc9672b3D6e3539171Df31Fe777)
+   - Manages intent lifecycle
+   - Handles solver registration
+   - Distributes rewards
+
+2. **IntentRouter** (0x607C43fa56df6fC436ed70e8e8860AeE07B74D25)
+   - Calculates optimal routes
+   - Determines execution strategy
+   - Cross-chain path finding
+
+3. **XCMBridge** (0xedDC0735AC932459Bc7FeAD80d24e985c85e2425)
+   - Handles cross-chain messaging
+   - Polkadot XCM integration
+   - Multi-chain coordination
+
+**Say:** "All three contracts are deployed and verified on Moonbase Alpha. You can inspect the code on Moonscan."
+
+### Part 5: Use Cases (2 minutes)
+
+**Explain real-world applications:**
+
+1. **Simple Transfers**
+   - "Send 20 USDC to Alice on Moonbeam"
+   - Solver handles gas optimization
+
+2. **Cross-Chain Swaps**
+   - "Swap DOT to USDC"
+   - Solver finds best route across chains
+
+3. **Yield Optimization**
+   - "Move my funds to highest APY"
+   - Solver monitors yields and rebalances
+
+4. **Automated Trading**
+   - "Buy when DOT drops below $5"
+   - Solver watches price and executes
+
+5. **Complex DeFi**
+   - "Provide liquidity on best DEX"
+   - Solver compares all options
 
 ---
 
-### Demo Scenario 2: Cross-Chain Swap
+## 🎨 Demo Tips
 
-**Goal:** Demonstrate intelligent routing and cross-chain execution
+### Visual Elements to Highlight
 
-**Steps:**
+1. **Cyberpunk Design**
+   - Electric pink (#FF006E) theme
+   - Terminal-style inputs
+   - Glitch effects
+   - Scanlines
+   - "Execute at the perfect moment" tagline
 
-1. **Create Complex Intent**
-   ```
-   Description: "Swap 10 DOT to USDC and send to Alice on Moonbeam"
-   Reward: 0.05 DOT
-   ```
+2. **Real-Time Data**
+   - Stats update from blockchain
+   - Live intent list
+   - Transaction confirmations
 
-2. **Watch Solver Bot Logs**
-   ```bash
-   # In solver bot terminal, you'll see:
-   [INFO] Intent parsed: action=swap+bridge, amount=10, token=DOT
-   [INFO] Calculating routes...
-   [INFO] Route A: Direct bridge → Moonbeam DEX (cost: 0.03 DOT)
-   [INFO] Route B: Polkadot DEX → Bridge (cost: 0.025 DOT)
-   [INFO] Selected Route B (15% cheaper)
-   [INFO] Profitability: reward=0.05, cost=0.025, profit=0.025 (50% margin)
-   [INFO] Executing intent...
-   ```
+3. **User Experience**
+   - Simple natural language
+   - One-click execution
+   - No complex forms
+   - Clear status updates
 
-3. **Monitor Execution**
-   - Step 1: Swap DOT → USDC on Polkadot Hub
-   - Step 2: Bridge USDC to Moonbeam via XCM
-   - Step 3: Transfer to Alice on Moonbeam
-   - Total time: ~2 minutes
+### Common Questions & Answers
 
-4. **Verify Results**
-   - Check XCM message status
-   - Verify Alice received USDC on Moonbeam
-   - Confirm solver received reward
+**Q: How do solvers make money?**
+A: Users set rewards for intent execution. Solvers compete for these rewards. Better solvers build reputation and get priority.
 
-**Expected Output:**
-```
-✅ Intent Created: 0x456...
-🔄 Parsing intent...
-📊 Route optimization: 2 paths analyzed
-✅ Best route selected (15% savings)
-💱 Swapping 10 DOT → 180 USDC
-🌉 Bridging to Moonbeam...
-⏳ XCM message sent: 0x789...
-✅ XCM delivered (120s)
-💸 Transferred to Alice
-✅ Intent completed
-💰 Solver profit: 0.025 DOT (50% margin)
-```
+**Q: What if no solver executes my intent?**
+A: Intents have deadlines. If not executed, the reward is refunded. Users can increase rewards to attract solvers.
+
+**Q: Is this secure?**
+A: Yes! Solvers must stake tokens. Failed executions result in slashing. All transactions are on-chain and verifiable.
+
+**Q: What chains are supported?**
+A: Currently Moonbase Alpha (testnet). Production will support Polkadot, Moonbeam, Asset Hub, and other parachains via XCM.
+
+**Q: How is this different from existing solutions?**
+A: Most solutions require users to understand blockchain complexity. Kairos abstracts everything - users just state their intent.
 
 ---
 
-### Demo Scenario 3: Failed Intent Recovery
+## 📊 Demo Metrics to Track
 
-**Goal:** Show error handling and refund mechanism
+During your demo, show:
 
-**Steps:**
-
-1. **Create Intent with Tight Deadline**
-   ```
-   Description: "Send 100 USDC to Bob"
-   Reward: 0.001 DOT (too low)
-   Deadline: 1 minute
-   ```
-
-2. **Watch Solver Analysis**
-   ```bash
-   [INFO] Intent received: 0xabc...
-   [INFO] Profitability analysis...
-   [WARN] Not profitable: reward=0.001, cost=0.002, profit=-0.001
-   [INFO] Skipping intent (unprofitable)
-   ```
-
-3. **Intent Expires**
-   - No solver executes (unprofitable)
-   - Deadline passes
-   - User can cancel and get refund
-
-4. **Cancel Intent**
-   - Click "Cancel" button
-   - Approve transaction
-   - Receive full refund
-
-**Expected Output:**
-```
-⚠️ Intent Created: 0xabc...
-⏳ Waiting for solver...
-⚠️ No solver found (unprofitable)
-⏰ Deadline approaching...
-❌ Intent expired
-💰 Refund available
-✅ Intent cancelled, refund received
-```
+- ✅ Transaction confirmation time
+- ✅ Gas costs (transparent)
+- ✅ Intent creation success
+- ✅ Real blockchain data
+- ✅ Contract verification on Moonscan
 
 ---
 
-## Sample Intents to Try
+## 🚀 Closing Statement
 
-### Basic Intents
-1. "Send 20 USDC to Alice"
-2. "Transfer 5 DOT to Bob"
-3. "Pay 100 tokens to 0x123..."
+"Kairos brings intent-based execution to Polkadot. We're making blockchain accessible by letting users focus on WHAT they want, not HOW to do it. Our solver network ensures optimal execution, and everything is transparent and verifiable on-chain."
 
-### Swap Intents
-4. "Swap 10 DOT to USDC"
-5. "Exchange 50 USDC for DOT"
-6. "Trade 1 ETH for GLMR"
-
-### Cross-Chain Intents
-7. "Send 20 USDC to Alice on Moonbeam"
-8. "Bridge 10 DOT to Moonriver"
-9. "Transfer 5 GLMR to Polkadot Hub"
-
-### Complex Intents
-10. "Swap 10 DOT to USDC and send to Alice on Moonbeam"
-11. "Bridge 5 DOT to Moonbeam and swap to GLMR"
+**Call to Action:**
+- "Try it yourself at [your-deployment-url]"
+- "Check our contracts on Moonscan"
+- "Join our community"
+- "Star us on GitHub: github.com/Venkat5599/kairos"
 
 ---
 
-## Troubleshooting
+## 📝 Pre-Demo Checklist
 
-### Issue: Contracts not deployed
-
-**Solution:**
-```bash
-# Check if Foundry is installed
-forge --version
-
-# If not, install Foundry
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-
-# Deploy contracts
-cd packages/contracts
-forge script script/Deploy.s.sol --rpc-url localhost --broadcast
-```
-
-### Issue: Services not starting
-
-**Solution:**
-```bash
-# Check Docker services
-docker-compose ps
-
-# Restart services
-docker-compose down
-docker-compose up -d
-
-# Check logs
-docker-compose logs -f
-```
-
-### Issue: Wallet connection fails
-
-**Solution:**
-1. Make sure MetaMask is installed
-2. Switch to correct network (Polkadot Hub testnet)
-3. Import test account with funds
-4. Refresh page and try again
-
-### Issue: Solver not executing
-
-**Solution:**
-```bash
-# Check solver bot logs
-cd packages/solver-bot
-npm run start:dev
-
-# Verify solver is registered
-# Check solver has sufficient stake
-# Ensure intent is profitable
-```
-
-### Issue: Frontend not loading
-
-**Solution:**
-```bash
-# Check if backend is running
-curl http://localhost:3001/health
-
-# Check frontend logs
-cd packages/frontend
-npm run dev
-
-# Clear browser cache
-# Try incognito mode
-```
+- [ ] MetaMask installed and configured
+- [ ] Moonbase Alpha network added
+- [ ] DEV tokens in wallet (at least 0.5 DEV)
+- [ ] Frontend running (npm run dev)
+- [ ] Contracts deployed and verified
+- [ ] Moonscan tabs open
+- [ ] Demo script practiced
+- [ ] Backup plan if transaction fails
 
 ---
 
-## Performance Benchmarks
-
-### Execution Times
-
-| Intent Type | Parsing | Route Calc | Execution | Total |
-|-------------|---------|------------|-----------|-------|
-| Direct | 50ms | 100ms | 15s | ~15s |
-| Swap | 80ms | 300ms | 30s | ~30s |
-| Cross-chain | 100ms | 500ms | 120s | ~2min |
-| Complex | 150ms | 800ms | 180s | ~3min |
-
-### Gas Costs
-
-| Operation | Gas Used | Cost (1 gwei) |
-|-----------|----------|---------------|
-| Create Intent | 150,000 | 0.00015 ETH |
-| Execute Intent | 100,000 | 0.0001 ETH |
-| Complete Intent | 80,000 | 0.00008 ETH |
-| Cancel Intent | 50,000 | 0.00005 ETH |
-
-### Success Rates
-
-- Direct transfers: 98%
-- Swaps: 95%
-- Cross-chain: 90%
-- Complex: 85%
-
----
-
-## Demo Video Script
-
-### Scene 1: Introduction (15 seconds)
-
-**Voiceover:**
-"Blockchain UX is broken. Users must understand gas, nonces, and complex transactions. IntentFlow changes that."
-
-**Visual:**
-- Show complex MetaMask transaction
-- Show confused user
-- Transition to IntentFlow logo
-
-### Scene 2: The Problem (30 seconds)
-
-**Voiceover:**
-"Want to send USDC to a friend on another chain? Currently, you need to bridge, swap, and transfer - across multiple apps, taking 15 minutes."
-
-**Visual:**
-- Screen recording of traditional flow
-- Show 7 different steps
-- Timer showing 15 minutes
-- Frustrated user
-
-### Scene 3: The Solution (45 seconds)
-
-**Voiceover:**
-"With IntentFlow, just describe what you want. Our intelligent solver network handles everything automatically."
-
-**Visual:**
-- Open IntentFlow UI
-- Type: "Send 20 USDC to Alice on Moonbeam"
-- Click create
-- Show solver bot analyzing
-- Show execution progress
-- Show completion in 2 minutes
-
-### Scene 4: Behind the Scenes (60 seconds)
-
-**Voiceover:**
-"Behind the scenes, our ML-powered routing engine analyzes multiple paths, calculates profitability, and selects the optimal route."
-
-**Visual:**
-- Split screen: UI + solver logs
-- Show intent parsing
-- Show route comparison
-- Show profitability calculation
-- Show execution steps
-- Highlight 15% cost savings
-
-### Scene 5: Results (15 seconds)
-
-**Voiceover:**
-"Intent completed. Alice received her USDC. The solver earned a reward. Everyone wins."
-
-**Visual:**
-- Show completed intent
-- Show analytics dashboard
-- Show solver reward
-- Happy user
-
-### Scene 6: Call to Action (15 seconds)
-
-**Voiceover:**
-"IntentFlow. Making blockchain as easy as sending an email. Try it today."
-
-**Visual:**
-- Show website URL
-- Show GitHub link
-- Show "Try Demo" button
-- IntentFlow logo
-
-**Total Duration: 3 minutes**
-
----
-
-## Next Steps
-
-After the demo:
-
-1. **Explore Code**
-   - Check out the smart contracts
-   - Review the solver bot logic
-   - Examine the ML routing algorithm
-
-2. **Run Tests**
-   ```bash
-   npm test
-   ```
-
-3. **Read Documentation**
-   - Architecture guide
-   - API documentation
-   - Security considerations
-
-4. **Join Community**
-   - Discord server
-   - GitHub discussions
-   - Twitter updates
-
-5. **Contribute**
-   - Report bugs
-   - Suggest features
-   - Submit PRs
-
----
-
-## Support
-
-Need help?
-- Discord: [Your Discord]
-- Email: support@intentflow.example.com
-- GitHub Issues: github.com/intentflow/issues
-
----
-
-**Happy demoing!** 🚀
+**Good luck with your demo! 🎉**

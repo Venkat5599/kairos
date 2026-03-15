@@ -27,16 +27,9 @@ export function useContractStats() {
 
   const publicClient = usePublicClient();
 
-  useEffect(() => {
-    fetchStats();
-    // Refresh every 10 seconds
-    const interval = setInterval(fetchStats, 10000);
-    return () => clearInterval(interval);
-  }, [publicClient]);
-
   const fetchStats = async () => {
-    if (!publicClient || !INTENT_REGISTRY_ADDRESS) {
-      setError('Contract not configured');
+    if (!INTENT_REGISTRY_ADDRESS || !publicClient) {
+      setError('Contract address not configured');
       setLoading(false);
       return;
     }
@@ -49,59 +42,79 @@ export function useContractStats() {
         functionName: 'getAllIntentIds',
       }) as `0x${string}`[];
 
-      const total = intentIds.length;
+      const totalIntents = intentIds.length;
+      
+      if (totalIntents === 0) {
+        setStats({
+          totalIntents: 0,
+          pendingIntents: 0,
+          completedIntents: 0,
+          failedIntents: 0,
+          successRate: '0%',
+        });
+        setError(null);
+        setLoading(false);
+        return;
+      }
 
-      // Get pending intents count directly
-      const pendingIntents = await publicClient.readContract({
-        address: INTENT_REGISTRY_ADDRESS,
-        abi: INTENT_REGISTRY_ABI,
-        functionName: 'getPendingIntentsCount',
-      }) as bigint;
+      let pendingIntents = 0;
+      let completedIntents = 0;
+      let failedIntents = 0;
 
-      const pending = Number(pendingIntents);
-
-      // Calculate completed and failed by checking each intent
-      let completed = 0;
-      let failed = 0;
-
-      // Fetch status of all intents (status: 0=Pending, 1=Executing, 2=Completed, 3=Failed, 4=Cancelled)
+      // Count intents by status
       for (const intentId of intentIds) {
         try {
           const intent = await publicClient.readContract({
             address: INTENT_REGISTRY_ADDRESS,
             abi: INTENT_REGISTRY_ABI,
-            functionName: 'getIntent',
+            functionName: 'intents',
             args: [intentId],
           }) as any;
 
           const status = intent.status;
-          if (status === 2) completed++;
-          if (status === 3) failed++;
+          if (status === 0) pendingIntents++;
+          else if (status === 2) completedIntents++;
+          else if (status === 3) failedIntents++;
         } catch (err) {
-          console.error(`Error fetching intent ${intentId}:`, err);
+          // Skip if intent can't be read
+          console.warn('Could not read intent:', intentId);
         }
       }
 
-      const successRate = total > 0
-        ? ((completed / total) * 100).toFixed(1) + '%'
+      const successRate = totalIntents > 0 
+        ? `${Math.round((completedIntents / totalIntents) * 100)}%`
         : '0%';
 
       setStats({
-        totalIntents: total,
-        pendingIntents: pending,
-        completedIntents: completed,
-        failedIntents: failed,
+        totalIntents,
+        pendingIntents,
+        completedIntents,
+        failedIntents,
         successRate,
       });
 
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching contract stats:', err);
-      setError('Failed to fetch stats from blockchain');
+      setStats({
+        totalIntents: 0,
+        pendingIntents: 0,
+        completedIntents: 0,
+        failedIntents: 0,
+        successRate: '0%',
+      });
+      setError(null);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, [publicClient]);
 
   return { stats, loading, error, refetch: fetchStats };
 }

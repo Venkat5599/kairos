@@ -13,14 +13,15 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
       if (log.topics[0] === '0x...') {
         // IntentCreated event
         const event = decodeIntentCreatedEvent(log);
+        if (!event || !event.args) continue;
 
         const intent = new Intent({
-          id: event.intentId,
+          id: event.args.intentId?.toString() || '',
           chainId: 1000,
-          creator: event.creator,
-          description: event.description,
-          reward: event.reward.toString(),
-          deadline: new Date(Number(event.deadline) * 1000),
+          creator: event.args.creator?.toString() || '',
+          description: event.args.description?.toString() || '',
+          reward: event.args.reward?.toString() || '0',
+          deadline: new Date(Number(event.args.deadline || 0) * 1000),
           status: 'PENDING',
           createdAt: new Date(block.header.timestamp),
           blockNumber: block.header.height,
@@ -31,28 +32,30 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
       } else if (log.topics[0] === '0x...') {
         // IntentExecuting event
         const event = decodeIntentExecutingEvent(log);
+        if (!event || !event.args) continue;
 
-        const intent = intents.get(event.intentId);
+        const intent = intents.get(event.args.intentId?.toString() || '');
         if (intent) {
           intent.status = 'EXECUTING';
-          intent.solverId = event.solver;
+          intent.solverId = event.args.solver?.toString();
         }
       } else if (log.topics[0] === '0x...') {
         // IntentCompleted event
         const event = decodeIntentCompletedEvent(log);
+        if (!event || !event.args) continue;
 
-        const intent = intents.get(event.intentId);
+        const intent = intents.get(event.args.intentId?.toString() || '');
         if (intent) {
           intent.status = 'COMPLETED';
           intent.executedAt = new Date(block.header.timestamp);
         }
 
         const execution = new Execution({
-          id: `${event.intentId}-${block.header.height}`,
-          intentId: event.intentId,
-          solverId: event.solver,
+          id: `${event.args.intentId}-${block.header.height}`,
+          intentId: event.args.intentId?.toString() || '',
+          solverId: event.args.solver?.toString() || '',
           success: true,
-          result: event.result,
+          result: event.args.result?.toString() || '',
           createdAt: new Date(block.header.timestamp),
         });
 

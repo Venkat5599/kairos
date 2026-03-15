@@ -16,7 +16,7 @@ export default function Footer() {
       </div>
       <div className="flex items-center space-x-4">
         <span className="hidden sm:inline">V2.4.1-STABLE</span>
-        <span className="text-cyber-blue">© 2024 KAIROS_SYSTEMS</span>
+        <span className="text-cyber-blue">© 2026 KAIROS_SYSTEMS</span>
       </div>
     </footer>
   );

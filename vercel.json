@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "packages/frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "packages/frontend/$1"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_INTENT_REGISTRY_ADDRESS": "0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB",
+    "NEXT_PUBLIC_INTENT_ROUTER_ADDRESS": "0x7E7d7D50353213c96aa1b6697c3e6407B4Df38AF",
+    "NEXT_PUBLIC_XCM_BRIDGE_ADDRESS": "0xe84F4ad4c49813Ab6A1D1d84B6347587BB162234",
+    "NEXT_PUBLIC_RPC_URL": "https://rpc.api.moonbase.moonbeam.network",
+    "NEXT_PUBLIC_CHAIN_ID": "1287"
+  }
+}

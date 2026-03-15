@@ -22,9 +22,9 @@ const POLL_INTERVAL = parseInt(process.env.SOLVER_POLL_INTERVAL || '10000');
 
 // Contract ABIs
 const INTENT_REGISTRY_ABI = [
-  'function intentCount() view returns (uint256)',
-  'function intents(uint256) view returns (address creator, string description, bytes data, uint256 reward, uint256 deadline, uint8 status, address solver, uint256 createdAt)',
-  'function solvers(address) view returns (bool isActive, uint256 stake, uint256 completedIntents, uint256 failedIntents)',
+  'function getAllIntentIds() view returns (bytes32[])',
+  'function intents(bytes32) view returns (bytes32 id, address creator, string description, bytes data, uint256 reward, uint256 deadline, uint8 status, address solver, uint256 createdAt, uint256 executedAt)',
+  'function solvers(address) view returns (address solverAddress, uint256 stake, uint256 reputation, uint256 totalExecuted, uint256 totalFailed, bool isActive, uint256 registeredAt)',
   'function executeIntent(bytes32 intentId) external',
   'function completeIntent(bytes32 intentId, bytes result) external',
   'function failIntent(bytes32 intentId, string reason) external',
@@ -37,7 +37,7 @@ class SimpleSolverBot {
   private wallet: ethers.Wallet;
   private contract: ethers.Contract;
   private isRunning: boolean = false;
-  private processedIntents: Set<number> = new Set();
+  private processedIntents: Set<string> = new Set();
 
   constructor() {
     console.log('🤖 Initializing Kairos Solver Bot...');
@@ -61,8 +61,9 @@ class SimpleSolverBot {
       const balance = await this.provider.getBalance(this.wallet.address);
       console.log(`💰 Balance: ${ethers.formatEther(balance)} DEV`);
 
-      if (balance < ethers.parseEther('0.1')) {
-        console.error('❌ Insufficient balance! Need at least 0.1 DEV');
+      if (balance < ethers.parseEther('0.0015')) {
+        console.error('❌ Insufficient balance! Need at least 0.0015 DEV');
+        console.log('   Get tokens from: https://faucet.moonbeam.network/');
         process.exit(1);
       }
 
@@ -71,24 +72,9 @@ class SimpleSolverBot {
 
       // Start listening
       this.isRunning = true;
-      console.log('👂 Listening for new intents...\n');
+      console.log('👂 Polling for new intents...\n');
 
-      // Listen for IntentCreated events
-      this.contract.on('IntentCreated', async (intentId, creator, description, reward, deadline) => {
-        console.log(`\n🔔 New Intent Detected!`);
-        console.log(`   ID: ${intentId}`);
-        console.log(`   Description: ${description}`);
-        console.log(`   Reward: ${ethers.formatEther(reward)} DEV`);
-        
-        // Process immediately
-        try {
-          await this.processIntent(intentId, description, reward);
-        } catch (error: any) {
-          console.error(`Error processing intent:`, error.message);
-        }
-      });
-
-      // Also poll for existing pending intents
+      // Use polling instead of event listeners (more reliable on public RPCs)
       this.pollPendingIntents();
 
     } catch (error: any) {
@@ -104,13 +90,12 @@ class SimpleSolverBot {
       
       try {
         const solverInfo = await this.contract.solvers(this.wallet.address);
-        isRegistered = solverInfo[0]; // isActive is first field
+        isRegistered = solverInfo[0]; // isActive is at index 0
         
         if (isRegistered) {
           console.log('✅ Already registered as solver');
           console.log(`   Stake: ${ethers.formatEther(solverInfo[1])} DEV`);
           console.log(`   Completed: ${solverInfo[2]}`);
-          console.log(`   Failed: ${solverInfo[3]}\n`);
           return;
         }
       } catch (error) {
@@ -118,9 +103,23 @@ class SimpleSolverBot {
         console.log('⚠️  Could not check registration status, attempting to register...');
       }
 
-      // Register as solver
+      // Check if we have enough balance to register
+      const balance = await this.provider.getBalance(this.wallet.address);
+      const minRequired = ethers.parseEther('0.1'); // Need at least 0.1 DEV to register
+      
+      if (balance < minRequired) {
+        console.log('⚠️  Not registered and insufficient balance to register');
+        console.log(`   Need at least 0.1 DEV, have ${ethers.formatEther(balance)} DEV`);
+        console.log('   Skipping registration, will only process if already registered...\n');
+        return;
+      }
+
+      // Register as solver with available balance (leave some for gas)
       console.log('📝 Registering as solver...');
-      const stake = ethers.parseEther('1.0');
+      const gasReserve = ethers.parseEther('0.01'); // Reserve for gas
+      const stake = balance - gasReserve;
+      
+      console.log(`   Staking: ${ethers.formatEther(stake)} DEV`);
       const tx = await this.contract.registerSolver({ value: stake });
       console.log(`   Transaction sent: ${tx.hash}`);
       
@@ -141,44 +140,60 @@ class SimpleSolverBot {
   }
 
   private async pollPendingIntents() {
+    console.log('🔍 Polling for pending intents...\n');
+    
     while (this.isRunning) {
       try {
-        const count = await this.contract.intentCount();
-        const total = Number(count);
-
-        // Check all intents for pending ones
+        // Get all intent IDs
+        const intentIds = await this.contract.getAllIntentIds();
+        const total = intentIds.length;
+        
+        if (total === 0) {
+          console.log('📋 No intents found yet. Waiting...');
+        }
+        
+        let foundPending = 0;
+        
+        // Check ALL intents, not just new ones
         for (let i = 0; i < total; i++) {
-          if (this.processedIntents.has(i)) continue;
-
           try {
-            const intent = await this.contract.intents(i);
-            const status = intent[5]; // status is at index 5
+            const intentId = intentIds[i];
+            
+            // Skip if already processed
+            const intentIdStr = intentId.toString();
+            if (this.processedIntents.has(intentIdStr)) continue;
+
+            // Get intent details using the intentId
+            const intent = await this.contract.intents(intentId);
+            const status = intent.status;
 
             if (status === 0) { // Pending
-              // Generate intent ID (same way contract does it)
-              const intentId = ethers.keccak256(
-                ethers.solidityPacked(
-                  ['address', 'uint256'],
-                  [intent[0], i] // creator address and index
-                )
-              );
+              foundPending++;
+              console.log(`\n🔔 Pending Intent Found!`);
+              console.log(`   ID: ${intentId}`);
+              console.log(`   Description: ${intent.description}`);
+              console.log(`   Reward: ${ethers.formatEther(intent.reward)} DEV`);
               
-              await this.processIntent(intentId, intent[1], intent[3]);
-              this.processedIntents.add(i);
+              await this.processIntent(intentId, intent.description, intent.reward);
+              this.processedIntents.add(intentIdStr);
             } else if (status === 2 || status === 3 || status === 4) {
               // Completed, Failed, or Cancelled - mark as processed
-              this.processedIntents.add(i);
+              this.processedIntents.add(intentIdStr);
             }
           } catch (error: any) {
             // Skip this intent if there's an error reading it
-            if (!error.message.includes('could not decode')) {
+            if (!error.message.includes('does not exist')) {
               console.error(`Error checking intent ${i}:`, error.message);
             }
           }
         }
+        
+        if (foundPending === 0) {
+          console.log(`📋 Found ${total} intent(s), 0 pending. Waiting for new intents...`);
+        }
       } catch (error: any) {
-        // Only log if it's not a decoding error
-        if (!error.message.includes('could not decode')) {
+        // Only log significant errors
+        if (!error.message.includes('does not exist')) {
           console.error('Error polling:', error.message);
         }
       }
@@ -207,6 +222,9 @@ class SimpleSolverBot {
       console.log(`   Type: ${parsed.type}`);
       console.log(`   To: ${parsed.recipient}`);
       console.log(`   Amount: ${ethers.formatEther(parsed.amount)} DEV`);
+      if (parsed.destinationChain) {
+        console.log(`   🌉 Destination Chain: ${parsed.destinationChain}`);
+      }
 
       // Step 1: Claim the intent
       console.log(`\n📝 Step 1: Claiming intent...`);
@@ -214,28 +232,35 @@ class SimpleSolverBot {
       const claimReceipt = await claimTx.wait();
       console.log(`✅ Intent claimed! (Block: ${claimReceipt?.blockNumber})`);
 
-      // Step 2: Execute the actual transaction
-      console.log(`\n💸 Step 2: Executing transfer...`);
-      const executeTx = await this.wallet.sendTransaction({
-        to: parsed.recipient,
-        value: parsed.amount,
-      });
-      const executeReceipt = await executeTx.wait();
-      console.log(`✅ Transfer completed!`);
-      console.log(`   Hash: ${executeTx.hash}`);
-      console.log(`   Block: ${executeReceipt?.blockNumber}`);
+      // Step 2: Execute based on type
+      if (parsed.type === 'CROSS_CHAIN_TRANSFER') {
+        // Cross-chain transfer via XCM Bridge
+        console.log(`\n🌉 Step 2: Executing cross-chain transfer...`);
+        await this.executeCrossChainTransfer(parsed, intentId, reward);
+      } else {
+        // Same-chain transfer
+        console.log(`\n💸 Step 2: Executing transfer...`);
+        const executeTx = await this.wallet.sendTransaction({
+          to: parsed.recipient,
+          value: parsed.amount,
+        });
+        const executeReceipt = await executeTx.wait();
+        console.log(`✅ Transfer completed!`);
+        console.log(`   Hash: ${executeTx.hash}`);
+        console.log(`   Block: ${executeReceipt?.blockNumber}`);
 
-      // Step 3: Mark as completed
-      console.log(`\n✅ Step 3: Marking as completed...`);
-      const completeTx = await this.contract.completeIntent(
-        intentId,
-        ethers.toUtf8Bytes(executeTx.hash)
-      );
-      const completeReceipt = await completeTx.wait();
-      console.log(`✅ Intent completed! (Block: ${completeReceipt?.blockNumber})`);
-      console.log(`💰 Reward claimed: ${ethers.formatEther(reward)} DEV`);
+        // Step 3: Mark as completed
+        console.log(`\n✅ Step 3: Marking as completed...`);
+        const completeTx = await this.contract.completeIntent(
+          intentId,
+          ethers.toUtf8Bytes(executeTx.hash)
+        );
+        const completeReceipt = await completeTx.wait();
+        console.log(`✅ Intent completed! (Block: ${completeReceipt?.blockNumber})`);
+        console.log(`💰 Reward claimed: ${ethers.formatEther(reward)} DEV`);
 
-      console.log(`\n🎉 SUCCESS! Intent fully executed.\n`);
+        console.log(`\n🎉 SUCCESS! Intent fully executed.\n`);
+      }
 
     } catch (error: any) {
       console.error(`\n❌ Error processing intent:`, error.message);
@@ -251,8 +276,8 @@ class SimpleSolverBot {
     }
   }
 
-  private parseIntent(description: string): { type: string; recipient: string; amount: bigint } | null {
-    // Pattern: "Send X DEV to 0x..."
+  private parseIntent(description: string): { type: string; recipient: string; amount: bigint; destinationChain?: string } | null {
+    // Pattern 1: "Send X DEV to 0x..." (same chain)
     const sendPattern = /send\s+([\d.]+)\s+dev\s+to\s+(0x[a-fA-F0-9]{40})/i;
     const match = description.match(sendPattern);
     
@@ -264,7 +289,7 @@ class SimpleSolverBot {
       };
     }
 
-    // Pattern: "Transfer X DEV to 0x..."
+    // Pattern 2: "Transfer X DEV to 0x..." (same chain)
     const transferPattern = /transfer\s+([\d.]+)\s+dev\s+to\s+(0x[a-fA-F0-9]{40})/i;
     const transferMatch = description.match(transferPattern);
     
@@ -276,11 +301,111 @@ class SimpleSolverBot {
       };
     }
 
+    // Pattern 3: "Send X DEV from Moonbeam to Ethereum 0x..." (cross-chain)
+    const crossChainPattern = /send\s+([\d.]+)\s+dev\s+from\s+(\w+)\s+to\s+(\w+)\s+(0x[a-fA-F0-9]{40})/i;
+    const crossMatch = description.match(crossChainPattern);
+    
+    if (crossMatch) {
+      return {
+        type: 'CROSS_CHAIN_TRANSFER',
+        recipient: crossMatch[4],
+        amount: ethers.parseEther(crossMatch[1]),
+        destinationChain: crossMatch[3].toLowerCase(),
+      };
+    }
+
+    // Pattern 4: "Bridge X DEV to Ethereum 0x..." (cross-chain)
+    const bridgePattern = /bridge\s+([\d.]+)\s+dev\s+to\s+(\w+)\s+(0x[a-fA-F0-9]{40})/i;
+    const bridgeMatch = description.match(bridgePattern);
+    
+    if (bridgeMatch) {
+      return {
+        type: 'CROSS_CHAIN_TRANSFER',
+        recipient: bridgeMatch[3],
+        amount: ethers.parseEther(bridgeMatch[1]),
+        destinationChain: bridgeMatch[2].toLowerCase(),
+      };
+    }
+
     return null;
   }
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async executeCrossChainTransfer(
+    parsed: { recipient: string; amount: bigint; destinationChain?: string },
+    intentId: string,
+    reward: bigint
+  ) {
+    try {
+      // Map chain names to parachain IDs (REAL Polkadot ecosystem IDs)
+      const chainIds: { [key: string]: number } = {
+        'polkadot': 0,      // Polkadot Relay Chain
+        'assethub': 1000,   // Asset Hub (Statemint)
+        'moonbeam': 2004,   // Moonbeam
+        'moonriver': 2023,  // Moonriver
+        'astar': 2006,      // Astar
+        'ethereum': 1000,   // Default to Asset Hub for now
+      };
+
+      const destinationChainId = chainIds[parsed.destinationChain?.toLowerCase() || 'polkadot'] || 0;
+
+      console.log(`   🌉 REAL XCM TRANSFER via Xtokens Precompile`);
+      console.log(`   Target Chain ID: ${destinationChainId} (${parsed.destinationChain || 'Polkadot'})`);
+      console.log(`   Recipient: ${parsed.recipient}`);
+      console.log(`   Amount: ${ethers.formatEther(parsed.amount)} DEV`);
+
+      // Convert Ethereum address to bytes32 for Polkadot AccountId32
+      // Remove 0x prefix and pad to 32 bytes
+      const recipientBytes32 = ethers.zeroPadValue(parsed.recipient, 32);
+
+      console.log(`   Recipient (bytes32): ${recipientBytes32}`);
+
+      // Get XCM Bridge contract with REAL XCM function
+      const XCM_BRIDGE_ABI = [
+        'function sendRealXCMTransfer(uint32 destinationChain, bytes32 recipient, uint256 amount) payable returns (bool)',
+      ];
+      
+      const bridgeContract = new ethers.Contract(
+        process.env.XCM_BRIDGE_ADDRESS || '0xe84F4ad4c49813Ab6A1D1d84B6347587BB162234',
+        XCM_BRIDGE_ABI,
+        this.wallet
+      );
+
+      console.log(`   📡 Calling Xtokens precompile...`);
+      
+      // Send REAL XCM transfer via Xtokens precompile
+      const bridgeTx = await bridgeContract.sendRealXCMTransfer(
+        destinationChainId,
+        recipientBytes32,
+        parsed.amount,
+        { value: parsed.amount }
+      );
+
+      const bridgeReceipt = await bridgeTx.wait();
+      console.log(`✅ REAL XCM transfer sent!`);
+      console.log(`   Hash: ${bridgeTx.hash}`);
+      console.log(`   Block: ${bridgeReceipt?.blockNumber}`);
+      console.log(`   🔍 Check on Polkadot explorer: https://polkadot.subscan.io/`);
+
+      // Mark intent as completed
+      console.log(`\n✅ Step 3: Marking as completed...`);
+      const completeTx = await this.contract.completeIntent(
+        intentId,
+        ethers.toUtf8Bytes(bridgeTx.hash)
+      );
+      const completeReceipt = await completeTx.wait();
+      console.log(`✅ Intent completed! (Block: ${completeReceipt?.blockNumber})`);
+      console.log(`💰 Reward claimed: ${ethers.formatEther(reward)} DEV`);
+
+      console.log(`\n🎉 SUCCESS! Real cross-chain intent executed via XCM!\n`);
+
+    } catch (error: any) {
+      console.error(`❌ Cross-chain transfer failed:`, error.message);
+      throw error;
+    }
   }
 
   stop() {
