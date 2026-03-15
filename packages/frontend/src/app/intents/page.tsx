@@ -10,7 +10,12 @@ import Footer from '@/components/Footer';
 
 export default function IntentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const { intents, loading, error } = useIntents(statusFilter ? { status: statusFilter } : undefined);
+  const { intents: allIntents, loading, error } = useIntents();
+  
+  // Filter intents based on status
+  const intents = statusFilter 
+    ? allIntents.filter(intent => intent.status.toUpperCase() === statusFilter)
+    : allIntents;
 
   return (
     <main className="min-h-screen p-4 md:p-8">
