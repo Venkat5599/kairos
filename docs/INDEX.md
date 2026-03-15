@@ -1,40 +1,62 @@
-# Kairos Documentation Index
+# 📚 Kairos Documentation Index
 
-## 📚 Quick Links
+Welcome to the Kairos documentation! This guide will help you navigate through all available documentation.
 
-### Getting Started
-- [Quick Start](./QUICK_START.md) - Get up and running in 5 minutes
-- [Setup Guide](./SETUP.md) - Complete installation guide
-- [User Guide](./USER_GUIDE.md) - How to use Kairos
+---
 
-### Architecture & Design
-- [Architecture](./ARCHITECTURE.md) - System design overview
-- [Architecture Visual](./ARCHITECTURE_VISUAL.md) - Diagrams and flows
-- [Contracts](./CONTRACTS.md) - Smart contract documentation
+## 🚀 Getting Started
 
-### Features
-- [Cross-Chain](./CROSS_CHAIN.md) - Cross-chain transfer guide
-- [XCM Implementation](./XCM_IMPLEMENTATION.md) - Real XCM integration details
-- [XCM Guide](./XCM_GUIDE.md) - XCM usage guide
-- [Solver Bot](./SOLVER_BOT.md) - Run your own solver
+Start here if you're new to Kairos:
 
-### Development
-- [API Documentation](./API.md) - API reference
-- [Deployment](./DEPLOYMENT.md) - Deployment guide
-- [Test Commands](./TEST_COMMANDS.md) - Quick test reference
-- [XCM Testing](./XCM_TESTING.md) - Testing XCM features
+1. **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes
+2. **[User Guide](USER_GUIDE.md)** - Learn how to use Kairos
 
-### Hackathon Materials
-- [Pitch Deck](./PITCH_DECK.md) - Presentation slides
-- [Demo Guide](./DEMO.md) - How to demo the project
-- [Performance Comparison](./PERFORMANCE_COMPARISON.md) - Benchmarks
-- [Improvements](./IMPROVEMENTS.md) - What we built
-- [Final Score](./FINAL_SCORE.md) - Score breakdown
-- [Hackathon Demo](./HACKATHON_DEMO.md) - Demo checklist
-- [Hackathon Submission](./HACKATHON_SUBMISSION.md) - Submission guide
+---
 
-### Project Info
-- [Roadmap](./ROADMAP.md) - Future plans
+## 🏗️ Architecture & Technical
+
+Understand how Kairos works:
+
+- **[Architecture Overview](ARCHITECTURE.md)** - System design and components
+- **[Architecture Visual](ARCHITECTURE_VISUAL.md)** - Diagrams and visual explanations
+- **[Smart Contracts](CONTRACTS.md)** - Contract architecture and functions
+- **[API Reference](API.md)** - API endpoints and usage
+
+---
+
+## 🌉 Cross-Chain & XCM
+
+Learn about cross-chain functionality:
+
+- **[Cross-Chain Guide](CROSS_CHAIN.md)** - How cross-chain transfers work
+- **[XCM Implementation](XCM_IMPLEMENTATION.md)** - Technical XCM details
+- **[XCM Guide](XCM_GUIDE.md)** - Using XCM features
+
+---
+
+## 🤖 Solver Bot
+
+For solver operators:
+
+- **[Solver Bot Guide](SOLVER_BOT.md)** - How to run a solver bot
+
+---
+
+## 🚀 Deployment & Hackathon
+
+For deployment and submission:
+
+- **[Deployment Guide](DEPLOYMENT_HACKATHON.md)** - Deploy to production
+- **[Pitch Deck](PITCH_DECK.md)** - Project presentation
+- **[Performance Comparison](PERFORMANCE_COMPARISON.md)** - Benchmarks and metrics
+
+---
+
+## 🗺️ Project Planning
+
+Future plans and roadmap:
+
+- **[Roadmap](ROADMAP.md)** - Future features and milestones
 
 ---
 
@@ -42,71 +64,43 @@
 
 ```
 docs/
-├── INDEX.md (this file)
-│
-├── Getting Started/
-│   ├── QUICK_START.md
-│   ├── SETUP.md
-│   └── USER_GUIDE.md
-│
-├── Architecture/
-│   ├── ARCHITECTURE.md
-│   ├── ARCHITECTURE_VISUAL.md
-│   └── CONTRACTS.md
-│
-├── Features/
-│   ├── CROSS_CHAIN.md
-│   ├── XCM_IMPLEMENTATION.md
-│   ├── XCM_GUIDE.md
-│   └── SOLVER_BOT.md
-│
-├── Development/
-│   ├── API.md
-│   ├── DEPLOYMENT.md
-│   ├── TEST_COMMANDS.md
-│   └── XCM_TESTING.md
-│
-└── Hackathon/
-    ├── PITCH_DECK.md
-    ├── DEMO.md
-    ├── PERFORMANCE_COMPARISON.md
-    ├── IMPROVEMENTS.md
-    ├── FINAL_SCORE.md
-    ├── HACKATHON_DEMO.md
-    └── HACKATHON_SUBMISSION.md
+├── INDEX.md                      # This file - documentation index
+├── QUICK_START.md               # 5-minute getting started guide
+├── USER_GUIDE.md                # End-user documentation
+├── ARCHITECTURE.md              # System architecture
+├── ARCHITECTURE_VISUAL.md       # Visual diagrams
+├── CONTRACTS.md                 # Smart contract docs
+├── API.md                       # API reference
+├── CROSS_CHAIN.md              # Cross-chain guide
+├── XCM_IMPLEMENTATION.md       # XCM technical details
+├── XCM_GUIDE.md                # XCM user guide
+├── SOLVER_BOT.md               # Solver bot guide
+├── DEPLOYMENT_HACKATHON.md     # Deployment guide
+├── PITCH_DECK.md               # Project pitch
+├── PERFORMANCE_COMPARISON.md   # Performance metrics
+└── ROADMAP.md                  # Future plans
 ```
 
 ---
 
-## 🎯 For Different Audiences
+## 🔗 Quick Links
 
-### For Users
-1. [Quick Start](./QUICK_START.md)
-2. [User Guide](./USER_GUIDE.md)
-3. [Cross-Chain Guide](./CROSS_CHAIN.md)
-
-### For Developers
-1. [Architecture](./ARCHITECTURE.md)
-2. [API Documentation](./API.md)
-3. [Contracts](./CONTRACTS.md)
-4. [Test Commands](./TEST_COMMANDS.md)
-
-### For Solvers
-1. [Solver Bot Guide](./SOLVER_BOT.md)
-2. [Setup Guide](./SETUP.md)
-3. [XCM Guide](./XCM_GUIDE.md)
-
-### For Judges
-1. [Pitch Deck](./PITCH_DECK.md)
-2. [Performance Comparison](./PERFORMANCE_COMPARISON.md)
-3. [Final Score](./FINAL_SCORE.md)
-4. [Demo Guide](./DEMO.md)
+- **Live Demo**: https://kairos-frontend-v969.vercel.app/
+- **GitHub**: https://github.com/Venkat5599/kairos
+- **Contracts**: Moonbase Alpha Testnet
+  - IntentRegistry: `0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB`
+  - IntentRouter: `0x7E7d7D50353213c96aa1b6697c3e6407B4Df38AF`
+  - XCMBridge: `0xe84F4ad4c49813Ab6A1D1d84B6347587BB162234`
 
 ---
 
-## 🔗 External Links
+## 💡 Need Help?
 
-- [Main README](../README.md)
-- [Security](../SECURITY.md)
-- [Testing](../TESTING.md)
-- [Contributing](../CONTRIBUTING.md)
+- Check the [Quick Start Guide](QUICK_START.md) for common setup issues
+- Review the [User Guide](USER_GUIDE.md) for usage questions
+- See [Architecture](ARCHITECTURE.md) for technical details
+- Read [Deployment Guide](DEPLOYMENT_HACKATHON.md) for deployment help
+
+---
+
+**Happy building with Kairos!** 🚀
