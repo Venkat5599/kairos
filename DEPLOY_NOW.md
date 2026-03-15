@@ -28,6 +28,12 @@ You'll get a URL like: `https://kairos-xyz.vercel.app`
 
 ✅ **Done!** Your app is live!
 
+## 🌐 Live Demo
+
+**Production URL**: https://kairos-frontend-lqkb.vercel.app/
+
+The app is deployed and connected to Moonbase Alpha testnet!
+
 ---
 
 ## Option 2: Manual Vercel Deploy
@@ -121,6 +127,7 @@ http://localhost:3000
 
 ### Minimum (Required)
 - ✅ GitHub repo: https://github.com/Venkat5599/kairos
+- ✅ Live demo: https://kairos-frontend-lqkb.vercel.app/
 - ✅ Contract addresses (already deployed)
 - ✅ README with setup instructions
 
@@ -148,7 +155,7 @@ http://localhost:3000
 1. Project Name: Kairos
 2. Category: Track 2 - PVM Smart Contracts
 3. GitHub: https://github.com/Venkat5599/kairos
-4. Live Demo: [Your Vercel/Netlify URL]
+4. Live Demo: https://kairos-frontend-lqkb.vercel.app/
 5. Contracts: See README
 6. Video: [Your video URL if you made one]
 ```

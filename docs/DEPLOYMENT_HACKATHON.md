@@ -152,7 +152,7 @@ During demo:
 
 ### Required Information
 
-#### 1. GitHub Repository
+#### 2. GitHub Repository
 ```
 URL: https://github.com/Venkat5599/kairos
 Status: ✅ Public and accessible
@@ -160,9 +160,8 @@ Status: ✅ Public and accessible
 
 #### 2. Live Demo URL
 ```
-Option A: Vercel URL (https://kairos-xyz.vercel.app)
-Option B: Netlify URL (https://kairos-xyz.netlify.app)
-Option C: "Demo available locally - see README"
+✅ https://kairos-frontend-lqkb.vercel.app/
+Status: ✅ Deployed and working
 ```
 
 #### 3. Smart Contract Addresses
