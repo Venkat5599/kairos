@@ -12,6 +12,26 @@ export default function IntentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const { intents: allIntents, loading, error } = useIntents();
   
+  // Helper function to get color based on status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Completed': return 'green';
+      case 'Executing': return 'pink';
+      case 'Failed': return 'red';
+      default: return 'blue';
+    }
+  };
+  
+  // Helper function to get progress based on status
+  const getProgress = (status: string) => {
+    switch (status) {
+      case 'Completed': return 100;
+      case 'Executing': return 50;
+      case 'Failed': return 100;
+      default: return 0;
+    }
+  };
+  
   // Filter intents based on status
   const intents = statusFilter 
     ? allIntents.filter(intent => intent.status.toUpperCase() === statusFilter)
@@ -59,15 +79,19 @@ export default function IntentsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {intents.map((intent) => (
+              {intents.map((intent) => {
+                const color = getStatusColor(intent.status);
+                const progress = getProgress(intent.status);
+                
+                return (
                 <div
                   key={intent.id}
                   className={`glass-panel p-4 rounded border ${
-                    intent.color === 'pink'
+                    color === 'pink'
                       ? 'border-cyber-pink/30'
-                      : intent.color === 'green'
+                      : color === 'green'
                       ? 'border-cyber-green/30'
-                      : intent.color === 'red'
+                      : color === 'red'
                       ? 'border-red-500/30'
                       : 'border-cyber-blue/30'
                   } hover:scale-[1.02] transition-transform`}
@@ -75,11 +99,11 @@ export default function IntentsPage() {
                   <div className="flex items-start justify-between mb-3">
                     <Badge
                       variant={
-                        intent.color === 'pink'
+                        color === 'pink'
                           ? 'pink'
-                          : intent.color === 'green'
+                          : color === 'green'
                           ? 'green'
-                          : intent.color === 'red'
+                          : color === 'red'
                           ? 'red'
                           : 'blue'
                       }
@@ -119,37 +143,37 @@ export default function IntentsPage() {
                   <div className="mt-3 pt-3 border-t border-slate-800">
                     <div
                       className={`w-full ${
-                        intent.color === 'pink'
+                        color === 'pink'
                           ? 'bg-cyber-pink/10'
-                          : intent.color === 'green'
+                          : color === 'green'
                           ? 'bg-cyber-green/10'
-                          : intent.color === 'red'
+                          : color === 'red'
                           ? 'bg-red-500/10'
                           : 'bg-cyber-blue/10'
                       } h-2 rounded-full overflow-hidden`}
                     >
                       <div
                         className={`${
-                          intent.color === 'pink'
+                          color === 'pink'
                             ? 'bg-cyber-pink'
-                            : intent.color === 'green'
+                            : color === 'green'
                             ? 'bg-cyber-green'
-                            : intent.color === 'red'
+                            : color === 'red'
                             ? 'bg-red-400'
                             : 'bg-cyber-blue'
                         } h-full transition-all duration-500`}
-                        style={{ width: `${intent.progress}%` }}
+                        style={{ width: `${progress}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-[10px] text-slate-500">Progress</span>
                       <span className="text-xs font-orbitron text-cyber-blue">
-                        {intent.progress}%
+                        {progress}%
                       </span>
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>
