@@ -1,28 +1,5 @@
-export const INTENT_STATUS = {
-  PENDING: 'PENDING',
-  EXECUTING: 'EXECUTING',
-  COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED',
-  CANCELLED: 'CANCELLED',
-} as const;
-
-export const STATUS_COLORS = {
-  PENDING: 'blue',
-  EXECUTING: 'pink',
-  COMPLETED: 'green',
-  FAILED: 'red',
-  CANCELLED: 'gray',
-} as const;
-
-export const STATUS_PROGRESS = {
-  PENDING: 25,
-  EXECUTING: 50,
-  COMPLETED: 100,
-  FAILED: 0,
-  CANCELLED: 0,
-} as const;
-
-export const POLLING_INTERVAL = 10000; // 10 seconds
-export const DEFAULT_PAGE_SIZE = 10;
-export const DEFAULT_REWARD = '0.01'; // ETH
-export const DEFAULT_DEADLINE_HOURS = 24;
+export const INTENT_REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_INTENT_REGISTRY_ADDRESS;
+export const INTENT_ROUTER_ADDRESS = process.env.NEXT_PUBLIC_INTENT_ROUTER_ADDRESS;
+export const XCM_BRIDGE_ADDRESS = process.env.NEXT_PUBLIC_XCM_BRIDGE_ADDRESS;
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID;

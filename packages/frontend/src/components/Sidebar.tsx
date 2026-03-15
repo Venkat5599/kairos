@@ -1,8 +1,16 @@
 'use client';
 
 import Image from 'next/image';
+import { useAccount } from 'wagmi';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useRecentActivity } from '@/hooks/useRecentActivity';
+import { formatAddress } from '@/lib/utils';
 
 export default function Sidebar() {
+  const { address, isConnected } = useAccount();
+  const { latency, gasPrice, solverCount, loading } = useNetworkStatus();
+  const logs = useRecentActivity();
+
   return (
     <aside className="space-y-6">
       {/* Profile Card */}
@@ -33,23 +41,35 @@ export default function Sidebar() {
         <div className="p-6 space-y-4 bg-gradient-to-b from-cyber-dark to-black">
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Identity Verified</span>
-              <span className="text-cyber-green font-orbitron font-bold">ONLINE</span>
+              <span className="text-slate-400">Wallet Status</span>
+              <span className={`font-orbitron font-bold ${isConnected ? 'text-cyber-green' : 'text-slate-500'}`}>
+                {isConnected ? 'CONNECTED' : 'OFFLINE'}
+              </span>
+            </div>
+            {isConnected && address && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">Address</span>
+                <span className="text-cyber-blue font-mono text-xs">
+                  {formatAddress(address)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Network</span>
+              <span className="text-cyber-green font-orbitron font-bold">MOONBASE</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Firewall Active</span>
-              <span className="text-cyber-green font-orbitron font-bold">SECURE</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">2FA Enabled</span>
+              <span className="text-slate-400">Security</span>
               <span className="text-cyber-green font-orbitron font-bold">ACTIVE</span>
             </div>
           </div>
-          <div className="pt-4 border-t border-slate-800">
-            <button className="w-full py-3 bg-slate-800/50 hover:bg-slate-700/50 text-xs font-orbitron uppercase tracking-widest rounded transition-colors border border-slate-700">
-              Manage Security
-            </button>
-          </div>
+          {isConnected && (
+            <div className="pt-4 border-t border-slate-800">
+              <div className="text-[10px] text-slate-500 font-mono">
+                Connected to Moonbase Alpha Testnet
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -62,19 +82,27 @@ export default function Sidebar() {
           <tbody className="divide-y divide-slate-800">
             <tr className="h-10">
               <td className="text-slate-400">Latency</td>
-              <td className="text-right text-cyber-blue">12ms</td>
+              <td className="text-right text-cyber-blue">
+                {loading ? '...' : `${latency}ms`}
+              </td>
             </tr>
             <tr className="h-10">
               <td className="text-slate-400">Gas Price</td>
-              <td className="text-right text-cyber-blue">18 Gwei</td>
+              <td className="text-right text-cyber-blue">
+                {loading ? '...' : `${parseFloat(gasPrice).toFixed(2)} Gwei`}
+              </td>
             </tr>
             <tr className="h-10">
-              <td className="text-slate-400">Uptime</td>
-              <td className="text-right text-cyber-green">99.99%</td>
+              <td className="text-slate-400">Status</td>
+              <td className="text-right text-cyber-green">
+                {isConnected ? 'ONLINE' : 'STANDBY'}
+              </td>
             </tr>
             <tr className="h-10">
               <td className="text-slate-400">Active Solvers</td>
-              <td className="text-right text-white">124</td>
+              <td className="text-right text-white">
+                {loading ? '...' : solverCount}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -83,11 +111,22 @@ export default function Sidebar() {
       {/* Mini Console/Terminal */}
       <div className="glass-panel p-4 rounded-lg border border-slate-800 h-48 flex flex-col font-mono text-[10px]">
         <div className="flex-grow overflow-hidden space-y-1">
-          <p className="text-slate-500">&gt; Establishing secure tunnel...</p>
-          <p className="text-cyber-green">&gt; Connection encrypted (AES-256)</p>
-          <p className="text-slate-500">&gt; Monitoring block 18,452,291</p>
-          <p className="text-cyber-pink">&gt; ALERT: Volatility detected in DAI/USDC</p>
-          <p className="text-slate-500">&gt; Recalibrating slippage params...</p>
+          {logs.slice(0, 6).map((log) => (
+            <p
+              key={log.id}
+              className={`${
+                log.type === 'success'
+                  ? 'text-cyber-green'
+                  : log.type === 'warning'
+                  ? 'text-cyber-pink'
+                  : log.type === 'error'
+                  ? 'text-red-400'
+                  : 'text-slate-500'
+              }`}
+            >
+              &gt; {log.message}
+            </p>
+          ))}
           <p className="text-white animate-pulse">&gt; _</p>
         </div>
       </div>
