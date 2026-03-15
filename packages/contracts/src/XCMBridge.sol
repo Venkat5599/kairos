@@ -122,6 +122,26 @@ contract XCMBridge is Ownable {
     uint32 public constant MOONBEAM = 2004;
     uint32 public constant MOONRIVER = 2023;
     uint32 public constant ASTAR = 2006;
+    
+    // Supported tokens
+    struct TokenInfo {
+        address tokenAddress;
+        string symbol;
+        uint8 decimals;
+        bool isSupported;
+    }
+    
+    mapping(address => TokenInfo) public supportedTokens;
+    address[] public tokenList;
+    
+    event TokenAdded(address indexed token, string symbol, uint8 decimals);
+    event TokenRemoved(address indexed token);
+    event MultiTokenTransfer(
+        address indexed token,
+        uint32 indexed destinationChain,
+        bytes32 recipient,
+        uint256 amount
+    );
 
     modifier onlyRegistry() {
         require(msg.sender == intentRegistry, "Only registry");
@@ -142,6 +162,15 @@ contract XCMBridge is Ownable {
         supportedChains[MOONBEAM] = true; // Moonbeam
         supportedChains[MOONRIVER] = true; // Moonriver
         supportedChains[ASTAR] = true; // Astar
+        
+        // Initialize native token (DEV) as supported
+        supportedTokens[address(0)] = TokenInfo({
+            tokenAddress: address(0),
+            symbol: "DEV",
+            decimals: 18,
+            isSupported: true
+        });
+        tokenList.push(address(0));
     }
 
     /**
@@ -265,27 +294,62 @@ contract XCMBridge is Ownable {
         bytes32 recipient,
         uint256 amount
     ) external payable returns (bool success) {
+        return sendRealXCMTransferWithToken(address(0), destinationChain, recipient, amount);
+    }
+    
+    /**
+     * @notice Send REAL XCM transfer with specific token using Xtokens precompile
+     * @param token Token address (address(0) for native DEV)
+     * @param destinationChain Target parachain ID
+     * @param recipient Recipient address on destination chain
+     * @param amount Amount to transfer
+     * @return success Whether transfer was initiated
+     */
+    function sendRealXCMTransferWithToken(
+        address token,
+        uint32 destinationChain,
+        bytes32 recipient,
+        uint256 amount
+    ) public payable returns (bool success) {
         require(supportedChains[destinationChain], "Chain not supported");
+        require(supportedTokens[token].isSupported, "Token not supported");
         require(amount > 0, "Amount must be > 0");
-        require(msg.value >= amount, "Insufficient value sent");
+        
+        if (token == address(0)) {
+            // Native token transfer
+            require(msg.value >= amount, "Insufficient value sent");
+        } else {
+            // ERC20 token transfer
+            require(msg.value >= BASE_FEE, "Insufficient fee");
+            // Transfer tokens from sender to this contract
+            (bool transferSuccess, ) = token.call(
+                abi.encodeWithSignature("transferFrom(address,address,uint256)", msg.sender, address(this), amount)
+            );
+            require(transferSuccess, "Token transfer failed");
+            
+            // Approve Xtokens precompile to spend tokens
+            (bool approveSuccess, ) = token.call(
+                abi.encodeWithSignature("approve(address,uint256)", address(XTOKENS), amount)
+            );
+            require(approveSuccess, "Token approval failed");
+        }
         
         // Build multilocation for destination
-        // Format: {parents: 1, interior: X2(Parachain(id), AccountId32(recipient))}
         bytes memory destination = _buildMultilocation(destinationChain, recipient);
         
-        // XCM weight for execution (4 billion should be enough for simple transfers)
+        // XCM weight for execution
         uint64 weight = 4_000_000_000;
         
         // Call Xtokens precompile to execute REAL cross-chain transfer
-        // address(0) means native token (DEV on Moonbase)
         try XTOKENS.transfer(
-            address(0), // Native DEV token
+            token, // Token address (address(0) for native)
             amount,
             destination,
             weight
         ) {
+            emit MultiTokenTransfer(token, destinationChain, recipient, amount);
             emit XCMMessageSent(
-                keccak256(abi.encodePacked(msg.sender, destinationChain, recipient, block.timestamp)),
+                keccak256(abi.encodePacked(msg.sender, token, destinationChain, recipient, block.timestamp)),
                 destinationChain,
                 abi.encodePacked(recipient, amount),
                 msg.value
@@ -293,7 +357,16 @@ contract XCMBridge is Ownable {
             return true;
         } catch {
             // Refund on failure
-            payable(msg.sender).transfer(msg.value);
+            if (token == address(0)) {
+                payable(msg.sender).transfer(msg.value);
+            } else {
+                // Return tokens to sender
+                (bool refundSuccess, ) = token.call(
+                    abi.encodeWithSignature("transfer(address,uint256)", msg.sender, amount)
+                );
+                require(refundSuccess, "Refund failed");
+                payable(msg.sender).transfer(msg.value);
+            }
             return false;
         }
     }
@@ -504,6 +577,68 @@ contract XCMBridge is Ownable {
      */
     function removeRelayer(address relayer) external onlyOwner {
         relayers[relayer] = false;
+    }
+    
+    /**
+     * @notice Add supported token
+     * @param token Token address
+     * @param symbol Token symbol
+     * @param decimals Token decimals
+     */
+    function addSupportedToken(
+        address token,
+        string calldata symbol,
+        uint8 decimals
+    ) external onlyOwner {
+        require(!supportedTokens[token].isSupported, "Token already supported");
+        
+        supportedTokens[token] = TokenInfo({
+            tokenAddress: token,
+            symbol: symbol,
+            decimals: decimals,
+            isSupported: true
+        });
+        
+        tokenList.push(token);
+        emit TokenAdded(token, symbol, decimals);
+    }
+    
+    /**
+     * @notice Remove supported token
+     * @param token Token address
+     */
+    function removeSupportedToken(address token) external onlyOwner {
+        require(token != address(0), "Cannot remove native token");
+        require(supportedTokens[token].isSupported, "Token not supported");
+        
+        supportedTokens[token].isSupported = false;
+        emit TokenRemoved(token);
+    }
+    
+    /**
+     * @notice Get all supported tokens
+     * @return Array of token addresses
+     */
+    function getSupportedTokens() external view returns (address[] memory) {
+        return tokenList;
+    }
+    
+    /**
+     * @notice Get token info
+     * @param token Token address
+     * @return TokenInfo struct
+     */
+    function getTokenInfo(address token) external view returns (TokenInfo memory) {
+        return supportedTokens[token];
+    }
+    
+    /**
+     * @notice Check if token is supported
+     * @param token Token address
+     * @return bool
+     */
+    function isTokenSupported(address token) external view returns (bool) {
+        return supportedTokens[token].isSupported;
     }
 
     receive() external payable {}
