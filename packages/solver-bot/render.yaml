@@ -1,0 +1,15 @@
+services:
+  - type: worker
+    name: kairos-solver-bot
+    env: node
+    buildCommand: npm install
+    startCommand: npm run start:simple
+    envVars:
+      - key: PRIVATE_KEY
+        sync: false
+      - key: RPC_URL
+        value: https://rpc.api.moonbase.moonbeam.network
+      - key: INTENT_REGISTRY_ADDRESS
+        value: 0xA7D5e4F74C05905EAD28dCF3cBab0891de4258dB
+      - key: CHAIN_ID
+        value: 1287
