@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePublicClient } from 'wagmi';
 import { INTENT_REGISTRY_ABI } from '@/lib/abis';
 
@@ -27,7 +27,7 @@ export function useContractStats() {
 
   const publicClient = usePublicClient();
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!INTENT_REGISTRY_ADDRESS || !publicClient) {
       setError('Contract address not configured');
       setLoading(false);
@@ -107,14 +107,14 @@ export function useContractStats() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [publicClient]);
 
   useEffect(() => {
     fetchStats();
     // Refresh every 30 seconds
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
-  }, [publicClient]);
+  }, [fetchStats]);
 
   return { stats, loading, error, refetch: fetchStats };
 }

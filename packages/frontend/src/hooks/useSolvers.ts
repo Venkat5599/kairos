@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePublicClient } from 'wagmi';
 import { createPublicClient, http } from 'viem';
 import { moonbaseAlpha } from '@/lib/wagmi';
@@ -25,14 +25,7 @@ export function useSolvers() {
 
   const publicClient = usePublicClient();
 
-  useEffect(() => {
-    fetchSolvers();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchSolvers, 30000);
-    return () => clearInterval(interval);
-  }, [publicClient]);
-
-  const fetchSolvers = async () => {
+  const fetchSolvers = useCallback(async () => {
     if (!INTENT_REGISTRY_ADDRESS) {
       setError('Contract address not configured');
       setLoading(false);
@@ -90,7 +83,14 @@ export function useSolvers() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [publicClient]);
+
+  useEffect(() => {
+    fetchSolvers();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchSolvers, 30000);
+    return () => clearInterval(interval);
+  }, [fetchSolvers]);
 
   return {
     solvers,

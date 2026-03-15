@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePublicClient } from 'wagmi';
 import { formatEther } from 'viem';
 import { INTENT_REGISTRY_ABI } from '@/lib/abis';
@@ -28,7 +28,7 @@ export function useIntents() {
 
   const publicClient = usePublicClient();
 
-  const fetchIntents = async () => {
+  const fetchIntents = useCallback(async () => {
     if (!INTENT_REGISTRY_ADDRESS || !publicClient) {
       setError('Contract address not configured');
       setLoading(false);
@@ -91,14 +91,14 @@ export function useIntents() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [publicClient]);
 
   useEffect(() => {
     fetchIntents();
     // Refresh every 30 seconds
     const interval = setInterval(fetchIntents, 30000);
     return () => clearInterval(interval);
-  }, [publicClient]);
+  }, [fetchIntents]);
 
   return { intents, loading, error, refetch: fetchIntents };
 }
