@@ -35,7 +35,7 @@ export function useCreateIntent() {
     reward: bigint;
     deadline: bigint;
   }) => {
-    writeContract({
+    return writeContract({
       address: CONTRACT_ADDRESS,
       abi: INTENT_REGISTRY_ABI,
       functionName: 'createIntent',

@@ -34,25 +34,27 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
       return;
     }
 
-    const { description, estimatedReward, recipient } = parseIntentCommand(command);
-
-    // Note: Cross-chain intents are supported! The solver bot will handle them.
-    // No need to validate recipient format here - let the solver parse it.
-
-    const deadline = Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_HOURS * 3600;
-
-    const validation = validateIntentParams({
-      description,
-      reward: estimatedReward,
-      deadline,
-    });
-
-    if (!validation.valid) {
-      toast.error(validation.error || 'Invalid intent parameters');
+    if (!command.trim()) {
+      toast.error('Please enter an intent command');
       return;
     }
 
     try {
+      const { description, estimatedReward, recipient } = parseIntentCommand(command);
+
+      const deadline = Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_HOURS * 3600;
+
+      const validation = validateIntentParams({
+        description,
+        reward: estimatedReward,
+        deadline,
+      });
+
+      if (!validation.valid) {
+        toast.error(validation.error || 'Invalid intent parameters');
+        return;
+      }
+
       setIsProcessing(true);
       toast.loading('Preparing transaction...', { id: 'intent-tx' });
 
@@ -67,12 +69,15 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
       setIsProcessing(false);
       toast.dismiss('intent-tx');
 
-      if (err.code === 'ACTION_REJECTED') {
-        toast.error('Transaction rejected');
+      if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
+        toast.error('Transaction rejected by user');
       } else if (err.message?.includes('insufficient funds')) {
-        toast.error('Insufficient funds');
+        toast.error('Insufficient funds for transaction');
+      } else if (err.message?.includes('user rejected')) {
+        toast.error('Transaction rejected by user');
       } else {
-        toast.error('Failed to create intent');
+        toast.error(err.message || 'Failed to create intent');
+        console.error('Full error:', err);
       }
     }
   };
