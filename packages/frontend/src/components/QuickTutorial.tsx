@@ -51,7 +51,7 @@ export default function QuickTutorial() {
               <div>
                 <h3 className="text-white font-orbitron font-bold mb-1">Connect Your Wallet</h3>
                 <p className="text-slate-400 text-sm">
-                  Click &quot;Connect Wallet&quot; in the top right. Make sure you&apos;re on Moonbase Alpha network.
+                  Click &quot;Connect Wallet&quot; in the top right. Make sure you&apos;re on Polkadot Hub TestNet.
                 </p>
               </div>
             </div>
@@ -86,14 +86,14 @@ export default function QuickTutorial() {
 
           <div className="bg-cyber-pink/10 border border-cyber-pink/30 rounded p-4">
             <p className="text-xs text-slate-400">
-              <span className="text-cyber-pink font-bold">💡 Tip:</span> Need test tokens? Get free DEV from{' '}
+              <span className="text-cyber-pink font-bold">💡 Tip:</span> Need test tokens? Get free PAS from{' '}
               <a
-                href="https://faucet.moonbeam.network/"
+                href="https://faucet.polkadot.io/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cyber-blue hover:underline"
               >
-                Moonbeam Faucet
+                Polkadot Faucet
               </a>
             </p>
           </div>

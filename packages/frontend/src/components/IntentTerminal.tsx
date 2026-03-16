@@ -1,23 +1,32 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState, memo, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { useCreateIntent } from '@/hooks/useContracts';
 import { parseIntentCommand, validateIntentParams, isName, isAddress } from '@/lib/utils';
 import { DEFAULT_DEADLINE_HOURS } from '@/lib/constants';
+import IntentSuggestions from './IntentSuggestions';
 
 interface IntentTerminalProps {
   onIntentCreated?: () => void;
+  initialCommand?: string;
 }
 
-const IntentTerminal = memo(function IntentTerminal({ onIntentCreated }: IntentTerminalProps) {
+const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCommand = '' }: IntentTerminalProps) {
   const { address, isConnected } = useAccount();
-  const [command, setCommand] = useState('send 0.01 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb');
+  const [command, setCommand] = useState(initialCommand || 'send 0.01 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { createIntent, hash, isPending, isConfirming, isConfirmed, error } = useCreateIntent();
+
+  // Update command when initialCommand changes
+  useEffect(() => {
+    if (initialCommand) {
+      setCommand(initialCommand);
+    }
+  }, [initialCommand]);
 
   const handleExecute = async () => {
     if (!isConnected || !address) {
@@ -103,18 +112,21 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated }: IntentT
         </div>
       </div>
       <div className="p-6 space-y-4">
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-          <div className="flex-grow bg-black/40 p-4 rounded border border-cyber-blue/20 w-full font-mono text-sm md:text-base flex items-center">
-            <span className="text-cyber-green mr-2">&gt; $</span>
-            <input
-              type="text"
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              className="flex-1 bg-transparent text-white outline-none"
-              placeholder="Enter your intent..."
-              disabled={isProcessing}
-            />
-            <span className="animate-pulse bg-cyber-blue w-2 h-5 ml-1"></span>
+        <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+          <div className="flex-grow w-full relative">
+            <div className="bg-black/40 p-4 rounded border border-cyber-blue/20 font-mono text-sm md:text-base flex items-center">
+              <span className="text-cyber-green mr-2">&gt; $</span>
+              <input
+                type="text"
+                value={command}
+                onChange={(e) => setCommand(e.target.value)}
+                className="flex-1 bg-transparent text-white outline-none"
+                placeholder="Enter your intent..."
+                disabled={isProcessing}
+              />
+              <span className="animate-pulse bg-cyber-blue w-2 h-5 ml-1"></span>
+            </div>
+            <IntentSuggestions input={command} onSelect={setCommand} />
           </div>
           <button
             onClick={handleExecute}

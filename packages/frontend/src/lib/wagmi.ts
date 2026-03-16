@@ -2,24 +2,24 @@ import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { http } from 'wagmi';
 import { defineChain } from 'viem';
 
-// Define Moonbase Alpha testnet
-export const moonbaseAlpha = defineChain({
-  id: 1287,
-  name: 'Moonbase Alpha',
+// Define Polkadot Hub TestNet
+export const polkadotHubTestnet = defineChain({
+  id: 420420417,
+  name: 'Polkadot Hub TestNet',
   nativeCurrency: {
     decimals: 18,
-    name: 'DEV',
-    symbol: 'DEV',
+    name: 'PAS',
+    symbol: 'PAS',
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.api.moonbase.moonbeam.network'],
+      http: [process.env.NEXT_PUBLIC_RPC_URL || 'https://eth-rpc-testnet.polkadot.io'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Moonscan',
-      url: 'https://moonbase.moonscan.io',
+      name: 'Blockscout',
+      url: 'https://blockscout-testnet.polkadot.io',
     },
   },
   testnet: true,
@@ -28,9 +28,9 @@ export const moonbaseAlpha = defineChain({
 export const config = getDefaultConfig({
   appName: 'Kairos',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'kairos-local-dev',
-  chains: [moonbaseAlpha],
+  chains: [polkadotHubTestnet],
   transports: {
-    [moonbaseAlpha.id]: http(),
+    [polkadotHubTestnet.id]: http(process.env.NEXT_PUBLIC_RPC_URL || 'https://eth-rpc-testnet.polkadot.io'),
   },
   ssr: true,
 });

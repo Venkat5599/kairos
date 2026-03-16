@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { usePublicClient } from 'wagmi';
 import { createPublicClient, http } from 'viem';
-import { moonbaseAlpha } from '@/lib/wagmi';
+import { polkadotHubTestnet } from '@/lib/wagmi';
 import { INTENT_REGISTRY_ABI } from '@/lib/abis';
 
 const INTENT_REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_INTENT_REGISTRY_ADDRESS as `0x${string}`;
@@ -34,8 +34,8 @@ export function useSolvers() {
 
     // Create a public client if wagmi's doesn't exist
     const client = publicClient || createPublicClient({
-      chain: moonbaseAlpha,
-      transport: http('https://rpc.api.moonbase.moonbeam.network'),
+      chain: polkadotHubTestnet,
+      transport: http('https://eth-rpc-testnet.polkadot.io'),
     });
 
     try {

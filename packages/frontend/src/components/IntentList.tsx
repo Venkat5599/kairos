@@ -114,7 +114,7 @@ export default function IntentList() {
 
   // Extract destination chain from description
   const getDestinationChain = (description: string) => {
-    const chains = ['Polkadot', 'Ethereum', 'Astar', 'Moonriver', 'Moonbeam'];
+    const chains = ['Polkadot', 'Ethereum', 'Astar', 'Moonriver', 'Asset Hub'];
     for (const chain of chains) {
       if (description.toLowerCase().includes(chain.toLowerCase())) {
         return chain;

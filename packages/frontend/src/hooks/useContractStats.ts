@@ -72,6 +72,16 @@ export function useContractStats() {
           }) as any;
 
           const status = intent.status;
+          
+          // Debug logging
+          console.log(`Intent ${intentId}: status=${status}`, {
+            id: intent.id,
+            creator: intent.creator,
+            description: intent.description,
+            status: status,
+            solver: intent.solver,
+          });
+          
           if (status === 0) pendingIntents++;
           else if (status === 2) completedIntents++;
           else if (status === 3) failedIntents++;

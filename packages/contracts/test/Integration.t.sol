@@ -29,9 +29,8 @@ contract IntegrationTest is Test {
         router = new IntentRouter(address(registry));
         bridge = new XCMBridge(address(registry));
         
-        // Configure registry
-        registry.setRouter(address(router));
-        registry.setBridge(address(bridge));
+        // Contracts are now deployed and ready
+        // IntentRegistry doesn't need configuration
         
         vm.stopPrank();
         

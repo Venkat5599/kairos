@@ -6,22 +6,26 @@ export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
 
   async getOverallStats() {
-    const [totalIntents, completedIntents, failedIntents, totalSolvers, pendingIntents] =
+    const [totalIntents, completedIntents, failedIntents, totalSolvers, pendingIntents, completedIntentsData] =
       await Promise.all([
         this.prisma.intent.count(),
         this.prisma.intent.count({ where: { status: 'COMPLETED' } }),
         this.prisma.intent.count({ where: { status: 'FAILED' } }),
         this.prisma.solver.count({ where: { isActive: true } }),
         this.prisma.intent.count({ where: { status: 'PENDING' } }),
+        this.prisma.intent.findMany({
+          where: { status: 'COMPLETED' },
+          select: { reward: true },
+        }),
       ]);
 
     const successRate =
       totalIntents > 0 ? ((completedIntents / totalIntents) * 100).toFixed(2) : '0';
 
-    const totalVolume = await this.prisma.intent.aggregate({
-      _sum: { reward: true },
-      where: { status: 'COMPLETED' },
-    });
+    // Calculate total volume manually since reward is a string
+    const totalVolume = completedIntentsData.reduce((sum, intent) => {
+      return sum + BigInt(intent.reward || '0');
+    }, BigInt(0));
 
     return {
       totalIntents,
@@ -30,7 +34,7 @@ export class AnalyticsService {
       pendingIntents,
       totalSolvers,
       successRate,
-      totalVolume: totalVolume._sum.reward || '0',
+      totalVolume: totalVolume.toString(),
     };
   }
 

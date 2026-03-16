@@ -12,8 +12,8 @@ const Header = memo(function Header() {
 
   const navItems = [
     { name: 'Dashboard', href: '/' },
-    { name: 'Intents', href: '/intents' },
-    { name: 'Solvers', href: '/solvers' },
+    { name: 'XCM Bridge', href: '/xcm-bridge' },
+    { name: 'Intent Marketplace', href: '/marketplace' },
     { name: 'Analytics', href: '/analytics' },
   ];
 
@@ -46,7 +46,7 @@ const Header = memo(function Header() {
         <ConnectButton />
         <div className="flex items-center space-x-2 text-[10px] font-orbitron bg-cyber-pink/20 px-3 py-1 rounded-full border border-cyber-pink">
           <div className="w-2 h-2 rounded-full bg-cyber-pink animate-pulse"></div>
-          <span className="text-cyber-pink uppercase">Moonbase Alpha</span>
+          <span className="text-cyber-pink uppercase">Polkadot Hub TestNet</span>
         </div>
       </div>
     </header>

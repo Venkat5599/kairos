@@ -49,11 +49,9 @@ interface IXtokens {
 interface IXcmTransactor {
     /**
      * @notice Execute remote call on another parachain
-     * @param transactor Type of transactor (0 = Relay, 1 = Sovereign)
-     * @param index Pallet index on destination chain
-     * @param innerCall Encoded call data
-     * @param weight Weight for execution
      * @param destination Multilocation of destination
+     * @param weight Weight for execution
+     * @param innerCall Encoded call data
      */
     function transactThroughSigned(
         bytes memory destination,

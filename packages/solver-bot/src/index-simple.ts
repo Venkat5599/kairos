@@ -14,7 +14,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Configuration
-const RPC_URL = process.env.RPC_URL || 'https://rpc.api.moonbase.moonbeam.network';
+const RPC_URL = process.env.RPC_URL || 'https://eth-rpc-testnet.polkadot.io';
 const SOLVER_PRIVATE_KEY = process.env.SOLVER_PRIVATE_KEY!;
 const INTENT_REGISTRY_ADDRESS = process.env.INTENT_REGISTRY_ADDRESS!;
 const MIN_REWARD = ethers.parseEther(process.env.SOLVER_MIN_REWARD || '0.001');
@@ -165,7 +165,10 @@ class SimpleSolverBot {
 
             // Get intent details using the intentId
             const intent = await this.contract.intents(intentId);
-            const status = intent.status;
+            const status = Number(intent.status); // Convert to number explicitly
+            
+            // Debug: Log the intent details
+            console.log(`   Intent ${i}: status=${status} (type: ${typeof status}), description="${intent.description.substring(0, 30)}..."`);
 
             if (status === 0) { // Pending
               foundPending++;
@@ -240,8 +243,13 @@ class SimpleSolverBot {
       } else {
         // Same-chain transfer
         console.log(`\n💸 Step 2: Executing transfer...`);
+        
+        // Ensure address is properly formatted (no ENS resolution)
+        const toAddress = parsed.recipient.toLowerCase();
+        console.log(`   Sending to: ${toAddress}`);
+        
         const executeTx = await this.wallet.sendTransaction({
-          to: parsed.recipient,
+          to: toAddress,
           value: parsed.amount,
         });
         const executeReceipt = await executeTx.wait();
@@ -277,57 +285,58 @@ class SimpleSolverBot {
   }
 
   private parseIntent(description: string): { type: string; recipient: string; amount: bigint; destinationChain?: string } | null {
-    // Pattern 1: "Send X DEV to 0x..." (same chain)
-    const sendPattern = /send\s+([\d.]+)\s+dev\s+to\s+(0x[a-fA-F0-9]{40})/i;
-    const match = description.match(sendPattern);
+    console.log(`   🔍 Parsing: "${description}"`);
     
-    if (match) {
-      return {
-        type: 'TRANSFER',
-        recipient: match[2],
-        amount: ethers.parseEther(match[1]),
-      };
+    // Find 0x in the string
+    const oxIndex = description.indexOf('0x');
+    console.log(`   0x found at index: ${oxIndex}`);
+    if (oxIndex >= 0) {
+      const addressPart = description.substring(oxIndex, oxIndex + 42);
+      console.log(`   Address part (42 chars): "${addressPart}" (length: ${addressPart.length})`);
     }
-
-    // Pattern 2: "Transfer X DEV to 0x..." (same chain)
-    const transferPattern = /transfer\s+([\d.]+)\s+dev\s+to\s+(0x[a-fA-F0-9]{40})/i;
-    const transferMatch = description.match(transferPattern);
     
-    if (transferMatch) {
-      return {
-        type: 'TRANSFER',
-        recipient: transferMatch[2],
-        amount: ethers.parseEther(transferMatch[1]),
-      };
+    // Extract address first (accept 39-42 hex chars to handle edge cases)
+    const addressMatch = description.match(/(0x[a-fA-F0-9]{39,42})/);
+    console.log(`   Address regex result:`, addressMatch);
+    
+    if (!addressMatch) {
+      console.log(`   ❌ No valid address found`);
+      return null;
     }
-
-    // Pattern 3: "Send X DEV from Moonbeam to Ethereum 0x..." (cross-chain)
-    const crossChainPattern = /send\s+([\d.]+)\s+dev\s+from\s+(\w+)\s+to\s+(\w+)\s+(0x[a-fA-F0-9]{40})/i;
-    const crossMatch = description.match(crossChainPattern);
+    const recipient = addressMatch[1];
+    console.log(`   ✅ Found address: ${recipient}`);
     
-    if (crossMatch) {
-      return {
-        type: 'CROSS_CHAIN_TRANSFER',
-        recipient: crossMatch[4],
-        amount: ethers.parseEther(crossMatch[1]),
-        destinationChain: crossMatch[3].toLowerCase(),
-      };
+    // Clean the description
+    const cleaned = description.trim().toLowerCase();
+    
+    // Extract amount
+    const amountMatch = cleaned.match(/send\s+([\d.]+)\s+(?:pas|dev)/);
+    if (!amountMatch) {
+      console.log(`   ❌ No valid amount found`);
+      return null;
     }
-
-    // Pattern 4: "Bridge X DEV to Ethereum 0x..." (cross-chain)
-    const bridgePattern = /bridge\s+([\d.]+)\s+dev\s+to\s+(\w+)\s+(0x[a-fA-F0-9]{40})/i;
-    const bridgeMatch = description.match(bridgePattern);
+    const amount = amountMatch[1];
+    console.log(`   ✅ Found amount: ${amount}`);
     
-    if (bridgeMatch) {
+    // Check if cross-chain
+    const chainMatch = cleaned.match(/to\s+(polkadot|assethub|astar|moonbeam|moonriver)\s+0x/);
+    
+    if (chainMatch) {
+      console.log(`   ✅ Cross-chain transfer to: ${chainMatch[1]}`);
       return {
         type: 'CROSS_CHAIN_TRANSFER',
-        recipient: bridgeMatch[3],
-        amount: ethers.parseEther(bridgeMatch[1]),
-        destinationChain: bridgeMatch[2].toLowerCase(),
+        recipient,
+        amount: ethers.parseEther(amount),
+        destinationChain: chainMatch[1],
       };
     }
-
-    return null;
+    
+    console.log(`   ✅ Same-chain transfer`);
+    return {
+      type: 'TRANSFER',
+      recipient,
+      amount: ethers.parseEther(amount),
+    };
   }
 
   private sleep(ms: number): Promise<void> {

@@ -56,7 +56,7 @@ export default function Sidebar() {
             )}
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">Network</span>
-              <span className="text-cyber-green font-orbitron font-bold">MOONBASE</span>
+              <span className="text-cyber-green font-orbitron font-bold">POLKADOT HUB</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">Security</span>
@@ -66,7 +66,7 @@ export default function Sidebar() {
           {isConnected && (
             <div className="pt-4 border-t border-slate-800">
               <div className="text-[10px] text-slate-500 font-mono">
-                Connected to Moonbase Alpha Testnet
+                Connected to Polkadot Hub TestNet
               </div>
             </div>
           )}

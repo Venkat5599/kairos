@@ -3,20 +3,25 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import StatsCards from '@/components/StatsCards';
 import IntentTerminal from '@/components/IntentTerminal';
 import IntentList from '@/components/IntentList';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import QuickTutorial from '@/components/QuickTutorial';
-import { useContractStats } from '@/hooks/useContractStats';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import IntentTemplates from '@/components/IntentTemplates';
 
 export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const { stats, loading, error } = useContractStats();
+  const [intentCommand, setIntentCommand] = useState('');
 
   const handleIntentCreated = () => {
     setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleTemplateSelect = (command: string) => {
+    setIntentCommand(command);
+    document.getElementById('intent-terminal')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -27,17 +32,23 @@ export default function Home() {
           <Header />
           <HeroSection />
           
-          {error && (
-            <div className="glass-panel p-4 border-l-4 border-red-500">
-              <p className="text-red-400 font-mono text-sm">⚠️ {error}</p>
-            </div>
-          )}
-          
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Content */}
             <div className="lg:col-span-8 space-y-6">
-              <StatsCards stats={stats} loading={loading} />
-              <IntentTerminal onIntentCreated={handleIntentCreated} />
+              {/* Intent Terminal - First thing users see */}
+              <div id="intent-terminal">
+                <IntentTerminal 
+                  onIntentCreated={handleIntentCreated}
+                  initialCommand={intentCommand}
+                />
+              </div>
+              
+              {/* Analytics Dashboard */}
+              <AnalyticsDashboard />
+              
+              {/* Intent Templates */}
+              <IntentTemplates onSelectTemplate={handleTemplateSelect} />
+              
               <IntentList key={refreshKey} />
             </div>
 
