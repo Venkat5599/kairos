@@ -53,7 +53,7 @@ const MOCK_INTENTS: MarketplaceIntent[] = [
   },
   {
     id: '2',
-    creator: '0x1E0048D83ba01D823dc852cfabeb94fC76B089B7',
+    creator: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
     name: 'Cross-Chain Bridge',
     description: 'Bridge assets from Polkadot Hub to Asset Hub',
     category: 'cross-chain',
@@ -73,7 +73,7 @@ const MOCK_INTENTS: MarketplaceIntent[] = [
   },
   {
     id: '3',
-    creator: '0x9700e80cffFE423ACFE4D8206B3f88306D5410EF',
+    creator: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
     name: 'Batch Transfer',
     description: 'Send tokens to multiple addresses in one transaction',
     category: 'transfer',
@@ -113,7 +113,7 @@ const MOCK_INTENTS: MarketplaceIntent[] = [
   },
   {
     id: '5',
-    creator: '0x1E0048D83ba01D823dc852cfabeb94fC76B089B7',
+    creator: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
     name: 'DeFi Swap',
     description: 'Swap tokens on decentralized exchanges',
     category: 'defi',
@@ -133,7 +133,7 @@ const MOCK_INTENTS: MarketplaceIntent[] = [
   },
   {
     id: '6',
-    creator: '0x9700e80cffFE423ACFE4D8206B3f88306D5410EF',
+    creator: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
     name: 'Governance Vote',
     description: 'Vote on governance proposals',
     category: 'governance',
