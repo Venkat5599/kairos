@@ -33,37 +33,31 @@ Kairos: ✅ Intent created and executed automatically
 - Smart suggestions based on context
 - Helps users write correct intents
 
-### 3. Live Analytics Dashboard
-- 8 real-time metrics updating every 30 seconds
-- Total intents, success rate, avg execution time
-- Active solvers, completed intents, rewards distributed
-- Data fetched directly from blockchain
-
-### 4. Intent Templates Library
+### 3. Intent Templates Library
 - 6 pre-built templates for common operations
 - Simple transfers, cross-chain bridges, batch operations
 - Filterable by category and difficulty
 - One-click template insertion
 
-### 5. XCM Bridge UI
+### 4. XCM Bridge UI
 - Visual cross-chain transfer interface
 - 5 supported chains: Polkadot Hub, Polkadot Relay, Asset Hub, Astar, Moonbeam
 - Chain selection with icons
 - Swap chains functionality
 
-### 6. Intent Marketplace
+### 5. Intent Marketplace
 - Browse all pending intents
 - Filter by type and sort by reward
 - Solvers can claim and execute intents
 - Earn rewards for successful execution
 
-### 7. Automated Solver Network
+### 6. Automated Solver Network
 - Bots monitor blockchain 24/7
 - Automatic intent detection and execution
 - Reputation system with staking
 - Deployed on Railway for 24/7 uptime
 
-### 8. Cross-Chain Ready
+### 7. Cross-Chain Ready
 - Native XCM integration
 - Support for multiple parachains
 - Real cross-chain transfers
