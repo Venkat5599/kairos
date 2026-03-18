@@ -41,4 +41,32 @@ export class AnalyticsController {
   getTopSolvers(@Query('limit') limit?: string) {
     return this.analyticsService.getTopSolvers(limit ? parseInt(limit) : 5);
   }
+
+  @Get('user/:address')
+  @ApiOperation({ summary: 'Get user-specific analytics' })
+  @ApiResponse({ status: 200, description: 'User analytics data' })
+  getUserAnalytics(@Query('address') address: string) {
+    return this.analyticsService.getUserAnalytics(address);
+  }
+
+  @Get('gas-optimization')
+  @ApiOperation({ summary: 'Get gas optimization metrics' })
+  @ApiResponse({ status: 200, description: 'Gas savings data' })
+  getGasOptimization() {
+    return this.analyticsService.getGasOptimizationMetrics();
+  }
+
+  @Get('solvers/leaderboard')
+  @ApiOperation({ summary: 'Get detailed solver leaderboard' })
+  @ApiResponse({ status: 200, description: 'Solver leaderboard with detailed stats' })
+  getSolverLeaderboard(@Query('limit') limit?: string) {
+    return this.analyticsService.getSolverLeaderboard(limit ? parseInt(limit) : 10);
+  }
+
+  @Get('timeseries')
+  @ApiOperation({ summary: 'Get time series data' })
+  @ApiResponse({ status: 200, description: 'Historical trend data' })
+  getTimeSeriesData(@Query('days') days?: string) {
+    return this.analyticsService.getTimeSeriesData(days ? parseInt(days) : 30);
+  }
 }

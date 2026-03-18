@@ -96,3 +96,189 @@ model Analytics {
 
   @@index([date])
 }
+
+// Scheduled Intents
+model ScheduledIntent {
+  id              String    @id @default(uuid())
+  creator         String
+  name            String
+  description     String
+  intentTemplate  Json      // Template for creating the intent
+  cronExpression  String?   // For recurring schedules
+  executeAt       DateTime? // For one-time schedules
+  conditions      Json?     // Conditional execution rules
+  isActive        Boolean   @default(true)
+  lastExecutedAt  DateTime?
+  nextExecutionAt DateTime?
+  executionCount  Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  executions      ScheduledExecution[]
+
+  @@index([creator])
+  @@index([isActive])
+  @@index([nextExecutionAt])
+}
+
+model ScheduledExecution {
+  id                String          @id @default(uuid())
+  scheduledIntentId String
+  intentId          String?
+  status            String          // pending, executed, failed, skipped
+  executedAt        DateTime?
+  error             String?
+  conditionsMet     Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+
+  scheduledIntent   ScheduledIntent @relation(fields: [scheduledIntentId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledIntentId])
+  @@index([status])
+}
+
+// Marketplace
+model MarketplaceIntent {
+  id              String   @id @default(uuid())
+  creator         String
+  name            String
+  description     String
+  category        String   // transfer, cross-chain, staking, defi, governance
+  difficulty      String   // beginner, intermediate, advanced
+  template        Json     // Intent template
+  icon            String?
+  usageCount      Int      @default(0)
+  successRate     Float    @default(0)
+  avgGasSaved     String   @default("0")
+  rating          Float    @default(0)
+  ratingCount     Int      @default(0)
+  isPublic        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  tags            String[] // Array of tags
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  usages          IntentUsage[]
+  ratings         IntentRating[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@index([usageCount])
+  @@index([rating])
+  @@index([isFeatured])
+}
+
+model IntentUsage {
+  id                  String            @id @default(uuid())
+  marketplaceIntentId String
+  userId              String
+  intentId            String
+  success             Boolean
+  gasSaved            String?
+  executionTime       Int?              // milliseconds
+  createdAt           DateTime          @default(now())
+
+  marketplaceIntent   MarketplaceIntent @relation(fields: [marketplaceIntentId], references: [id], onDelete: Cascade)
+
+  @@index([marketplaceIntentId])
+  @@index([userId])
+}
+
+model IntentRating {
+  id                  String            @id @default(uuid())
+  marketplaceIntentId String
+  userId              String
+  rating              Int               // 1-5
+  review              String?
+  createdAt           DateTime          @default(now())
+
+  marketplaceIntent   MarketplaceIntent @relation(fields: [marketplaceIntentId], references: [id], onDelete: Cascade)
+
+  @@unique([marketplaceIntentId, userId])
+  @@index([marketplaceIntentId])
+}
+
+// Workflows
+model Workflow {
+  id          String   @id @default(uuid())
+  creator     String
+  name        String
+  description String
+  steps       Json     // Array of workflow steps
+  isPublic    Boolean  @default(false)
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  executions  WorkflowExecution[]
+
+  @@index([creator])
+  @@index([isPublic])
+}
+
+model WorkflowExecution {
+  id          String   @id @default(uuid())
+  workflowId  String
+  creator     String
+  status      String   // pending, executing, completed, failed
+  currentStep Int      @default(0)
+  results     Json?    // Results from each step
+  error       String?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  workflow    Workflow @relation(fields: [workflowId], references: [id])
+
+  @@index([workflowId])
+  @@index([creator])
+  @@index([status])
+}
+
+// Collaborative Intents
+model CollaborativeIntent {
+  id              String   @id @default(uuid())
+  intentId        String   @unique
+  creator         String
+  totalAmount     String
+  requiredApprovals Int    @default(1)
+  approvalCount   Int      @default(0)
+  status          String   // pending, approved, rejected, executed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  participants    IntentParticipant[]
+
+  @@index([creator])
+  @@index([status])
+}
+
+model IntentParticipant {
+  id                    String              @id @default(uuid())
+  collaborativeIntentId String
+  address               String
+  contribution          String
+  hasApproved           Boolean             @default(false)
+  approvedAt            DateTime?
+  createdAt             DateTime            @default(now())
+
+  collaborativeIntent   CollaborativeIntent @relation(fields: [collaborativeIntentId], references: [id], onDelete: Cascade)
+
+  @@unique([collaborativeIntentId, address])
+  @@index([collaborativeIntentId])
+  @@index([address])
+}
+
+// Social Features
+model IntentShare {
+  id          String   @id @default(uuid())
+  intentId    String
+  creator     String
+  shareUrl    String   @unique
+  views       Int      @default(0)
+  clones      Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([intentId])
+  @@index([creator])
+  @@index([shareUrl])
+}

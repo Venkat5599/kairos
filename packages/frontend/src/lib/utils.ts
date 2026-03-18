@@ -29,28 +29,62 @@ export function calculateProgress(status: string): number {
   return STATUS_PROGRESS[status as keyof typeof STATUS_PROGRESS] || 0;
 }
 
-export function parseIntentCommand(command: string): {
+export async function parseIntentCommand(command: string): Promise<{
   description: string;
   estimatedReward: string;
   recipient?: string;
-} {
-  // Basic parsing - extract description and estimate reward
+  token?: string;
+  chain?: string;
+  confidence?: number;
+}> {
+  // Try AI parsing first if backend is available
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+    const response = await fetch(`${backendUrl}/ai/parse`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command }),
+    });
+
+    if (response.ok) {
+      const parsed = await response.json();
+      return {
+        description: parsed.description || command,
+        estimatedReward: parsed.amount || '0.01',
+        recipient: parsed.recipient,
+        token: parsed.token || 'DEV',
+        chain: parsed.chain,
+        confidence: parsed.confidence,
+      };
+    }
+  } catch (error) {
+    console.warn('AI parsing failed, using fallback:', error);
+  }
+
+  // Fallback to regex parsing
   const description = command.trim();
 
   // Try to extract recipient (name or address)
-  // Patterns: "send X to Alice", "transfer X to 0x123...", "pay Alice"
   const toPattern = /\bto\s+([a-zA-Z0-9_]+|0x[a-fA-F0-9]{40})\b/i;
   const match = command.match(toPattern);
   const recipient = match ? match[1] : undefined;
 
-  // Simple heuristic: if command mentions amounts, suggest higher reward
-  const hasAmount = /\d+/.test(command);
-  const estimatedReward = hasAmount ? '0.02' : '0.01';
+  // Extract token and amount
+  const amountMatch = command.match(/(\d+\.?\d*)\s*(DEV|USDC|USDT|DAI|DOT)/i);
+  const token = amountMatch ? amountMatch[2].toUpperCase() : 'DEV';
+  const estimatedReward = amountMatch ? (parseFloat(amountMatch[1]) * 0.01).toFixed(4) : '0.01';
+
+  // Extract chain
+  const chainMatch = command.match(/\b(polkadot|assethub|moonbeam|acala)\b/i);
+  const chain = chainMatch ? chainMatch[1].toLowerCase() : undefined;
 
   return {
     description,
     estimatedReward,
     recipient,
+    token,
+    chain,
+    confidence: 0.7,
   };
 }
 

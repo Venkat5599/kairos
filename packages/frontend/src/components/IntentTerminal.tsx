@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { useCreateIntent } from '@/hooks/useContracts';
-import { parseIntentCommand, validateIntentParams, isName, isAddress } from '@/lib/utils';
+import { parseIntentCommand, validateIntentParams } from '@/lib/utils';
 import { DEFAULT_DEADLINE_HOURS } from '@/lib/constants';
 import IntentSuggestions from './IntentSuggestions';
 
@@ -40,7 +40,8 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
     }
 
     try {
-      const { description, estimatedReward, recipient } = parseIntentCommand(command);
+      const parsed = await parseIntentCommand(command);
+      const { description, estimatedReward } = parsed;
 
       const deadline = Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_HOURS * 3600;
 
@@ -63,6 +64,7 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
         data: '0x',
         reward: parseEther(estimatedReward),
         deadline: BigInt(deadline),
+        rewardToken: '0x0000000000000000000000000000000000000000', // Native DEV token
       });
     } catch (err: any) {
       console.error('Intent creation error:', err);
@@ -82,27 +84,40 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
     }
   };
 
-  // Handle transaction states
-  if (isPending && !isProcessing) {
-    setIsProcessing(true);
-    toast.loading('Confirm transaction in wallet...', { id: 'intent-tx' });
-  }
+  // Handle transaction states with useEffect
+  useEffect(() => {
+    if (isPending && !isProcessing) {
+      console.log('Transaction pending - waiting for user confirmation');
+      setIsProcessing(true);
+      toast.loading('Confirm transaction in wallet...', { id: 'intent-tx' });
+    }
+  }, [isPending, isProcessing]);
 
-  if (isConfirming && isProcessing) {
-    toast.loading('Transaction confirming...', { id: 'intent-tx' });
-  }
+  useEffect(() => {
+    if (isConfirming && isProcessing) {
+      console.log('Transaction confirming on blockchain...');
+      toast.loading('Transaction confirming...', { id: 'intent-tx' });
+    }
+  }, [isConfirming, isProcessing]);
 
-  if (isConfirmed && isProcessing) {
-    toast.success('Intent created successfully!', { id: 'intent-tx' });
-    setCommand('');
-    setIsProcessing(false);
-    onIntentCreated?.();
-  }
+  useEffect(() => {
+    if (isConfirmed && isProcessing) {
+      console.log('Transaction confirmed! Hash:', hash);
+      toast.success('Intent created successfully!', { id: 'intent-tx' });
+      setCommand('');
+      setIsProcessing(false);
+      onIntentCreated?.();
+    }
+  }, [isConfirmed, isProcessing, onIntentCreated, hash]);
 
-  if (error && isProcessing) {
-    setIsProcessing(false);
-    toast.dismiss('intent-tx');
-  }
+  useEffect(() => {
+    if (error && isProcessing) {
+      console.error('Transaction error:', error);
+      setIsProcessing(false);
+      toast.dismiss('intent-tx');
+      toast.error(error.message || 'Transaction failed');
+    }
+  }, [error, isProcessing]);
 
   return (
     <div className="glass-panel rounded-lg overflow-hidden blue-glow-border">

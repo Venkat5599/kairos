@@ -25,6 +25,7 @@ interface IIntent {
         address solver;
         uint256 createdAt;
         uint256 executedAt;
+        address rewardToken; // address(0) for native token, ERC20 address for tokens
     }
 
     struct IntentParams {
@@ -32,6 +33,7 @@ interface IIntent {
         bytes data;
         uint256 reward;
         uint256 deadline;
+        address rewardToken; // address(0) for native token, ERC20 address for tokens
     }
 
     event IntentCreated(

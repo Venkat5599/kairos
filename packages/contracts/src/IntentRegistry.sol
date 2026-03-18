@@ -7,6 +7,8 @@ import {IntentLib} from "./libraries/IntentLib.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "openzeppelin-contracts/contracts/utils/Pausable.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title IntentRegistry
@@ -16,12 +18,14 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable {
     using IntentLib for IIntent.Intent;
     using IntentLib for IIntent.IntentParams;
+    using SafeERC20 for IERC20;
 
     // State variables
     mapping(bytes32 => Intent) public intents;
     mapping(address => uint256) public userNonces;
     mapping(address => SolverInfo) public solvers;
     mapping(address => uint256) public pendingRewards;
+    mapping(address => bool) public supportedTokens; // Supported ERC20 tokens
 
     bytes32[] public intentIds;
     uint256 public constant MIN_STAKE = 1 ether;
@@ -51,7 +55,16 @@ contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable 
         IntentParams calldata params
     ) external payable whenNotPaused returns (bytes32 intentId) {
         require(params.validateIntentParams(), "Invalid intent parameters");
-        require(msg.value >= params.reward, "Insufficient reward");
+
+        // Handle native token (address(0)) or ERC20 token
+        if (params.rewardToken == address(0)) {
+            require(msg.value >= params.reward, "Insufficient reward");
+        } else {
+            require(supportedTokens[params.rewardToken], "Token not supported");
+            require(msg.value == 0, "Do not send native token with ERC20 intent");
+            // Transfer ERC20 tokens from creator to contract
+            IERC20(params.rewardToken).safeTransferFrom(msg.sender, address(this), params.reward);
+        }
 
         intentId = IntentLib.generateIntentId(msg.sender, userNonces[msg.sender]++);
 
@@ -65,7 +78,8 @@ contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable 
             status: IntentStatus.Pending,
             solver: address(0),
             createdAt: block.timestamp,
-            executedAt: 0
+            executedAt: 0,
+            rewardToken: params.rewardToken
         });
 
         intentIds.push(intentId);
@@ -119,7 +133,15 @@ contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable 
             solvers[msg.sender].reputation
         );
 
-        pendingRewards[msg.sender] += reward;
+        // Transfer reward based on token type
+        if (intent.rewardToken == address(0)) {
+            // Native token reward
+            pendingRewards[msg.sender] += reward;
+        } else {
+            // ERC20 token reward - transfer directly to solver
+            IERC20(intent.rewardToken).safeTransfer(msg.sender, reward);
+        }
+
         solvers[msg.sender].totalExecuted++;
         solvers[msg.sender].reputation += 10;
 
@@ -166,8 +188,14 @@ contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable 
 
         intent.status = IntentStatus.Cancelled;
 
-        // Refund reward to creator
-        payable(msg.sender).transfer(intent.reward);
+        // Refund reward to creator based on token type
+        if (intent.rewardToken == address(0)) {
+            // Native token refund
+            payable(msg.sender).transfer(intent.reward);
+        } else {
+            // ERC20 token refund
+            IERC20(intent.rewardToken).safeTransfer(msg.sender, intent.reward);
+        }
 
         emit IntentCancelled(intentId, msg.sender);
     }
@@ -275,5 +303,31 @@ contract IntentRegistry is IIntent, ISolver, ReentrancyGuard, Pausable, Ownable 
      */
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @notice Add a supported ERC20 token for rewards
+     * @param token Token address to add
+     */
+    function addSupportedToken(address token) external onlyOwner {
+        require(token != address(0), "Invalid token address");
+        supportedTokens[token] = true;
+    }
+
+    /**
+     * @notice Remove a supported ERC20 token
+     * @param token Token address to remove
+     */
+    function removeSupportedToken(address token) external onlyOwner {
+        supportedTokens[token] = false;
+    }
+
+    /**
+     * @notice Check if a token is supported
+     * @param token Token address to check
+     * @return bool True if token is supported
+     */
+    function isTokenSupported(address token) external view returns (bool) {
+        return token == address(0) || supportedTokens[token];
     }
 }

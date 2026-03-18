@@ -8,7 +8,6 @@ import IntentList from '@/components/IntentList';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import QuickTutorial from '@/components/QuickTutorial';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import IntentTemplates from '@/components/IntentTemplates';
 
 export default function Home() {
@@ -42,9 +41,6 @@ export default function Home() {
                   initialCommand={intentCommand}
                 />
               </div>
-              
-              {/* Analytics Dashboard */}
-              <AnalyticsDashboard />
               
               {/* Intent Templates */}
               <IntentTemplates onSelectTemplate={handleTemplateSelect} />

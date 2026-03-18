@@ -14,7 +14,6 @@ const Header = memo(function Header() {
     { name: 'Dashboard', href: '/' },
     { name: 'XCM Bridge', href: '/xcm-bridge' },
     { name: 'Intent Marketplace', href: '/marketplace' },
-    { name: 'Analytics', href: '/analytics' },
   ];
 
   return (
