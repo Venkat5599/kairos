@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useEffect } from 'react';
+import { useState, memo, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
@@ -18,8 +18,69 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
   const { address, isConnected } = useAccount();
   const [command, setCommand] = useState(initialCommand || 'send 0.01 DEV to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const { createIntent, hash, isPending, isConfirming, isConfirmed, error } = useCreateIntent();
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        setIsVoiceSupported(true);
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsListening(true);
+          toast.success('🎤 Listening... Speak your intent', { id: 'voice' });
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setCommand(transcript);
+          toast.success(`Heard: "${transcript}"`, { id: 'voice' });
+        };
+
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+          if (event.error === 'no-speech') {
+            toast.error('No speech detected. Please try again.', { id: 'voice' });
+          } else if (event.error === 'not-allowed') {
+            toast.error('Microphone access denied. Please enable it in browser settings.', { id: 'voice' });
+          } else {
+            toast.error('Voice recognition error. Please try again.', { id: 'voice' });
+          }
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        toast.error('Could not start voice recognition', { id: 'voice' });
+      }
+    }
+  };
 
   // Update command when initialCommand changes
   useEffect(() => {
@@ -141,9 +202,33 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
                 value={command}
                 onChange={(e) => setCommand(e.target.value)}
                 className="flex-1 bg-transparent text-white outline-none"
-                placeholder="Enter your intent..."
-                disabled={isProcessing}
+                placeholder="Enter your intent or click the mic..."
+                disabled={isProcessing || isListening}
               />
+              {isVoiceSupported && (
+                <button
+                  onClick={toggleVoiceInput}
+                  disabled={isProcessing}
+                  className={`ml-2 p-2 rounded transition-all ${
+                    isListening
+                      ? 'bg-red-500/20 text-red-400 animate-pulse'
+                      : 'bg-cyber-blue/20 text-cyber-blue hover:bg-cyber-blue/30'
+                  }`}
+                  title={isListening ? 'Stop listening' : 'Start voice input'}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              )}
               <span className="animate-pulse bg-cyber-blue w-2 h-5 ml-1"></span>
             </div>
             <IntentSuggestions input={command} onSelect={setCommand} />
