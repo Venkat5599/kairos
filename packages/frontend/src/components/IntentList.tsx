@@ -1,9 +1,12 @@
 'use client';
 
+import { useAccount } from 'wagmi';
 import { useIntents } from '@/hooks/useIntents';
+import SelfExecuteButton from './SelfExecuteButton';
 
 export default function IntentList() {
-  const { intents, loading, error } = useIntents();
+  const { address } = useAccount();
+  const { intents, loading, error, refetch } = useIntents();
 
   if (loading) {
     return (
@@ -180,6 +183,15 @@ export default function IntentList() {
                   <span>Reward: {intent.reward} DEV</span>
                   <span>Creator: {intent.creator.slice(0, 6)}...{intent.creator.slice(-4)}</span>
                 </div>
+                {/* Self-execute button for pending intents */}
+                {intent.status === 'Pending' && address && (
+                  <div className="mt-2">
+                    <SelfExecuteButton 
+                      intentId={intent.id as `0x${string}`} 
+                      onExecuted={refetch}
+                    />
+                  </div>
+                )}
               </div>
               <span
                 className={`text-xs font-orbitron ${
