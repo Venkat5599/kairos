@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(npm run:*)",
-      "Bash(curl -L https://foundry.paradigm.xyz)"
-    ]
-  }
-}
