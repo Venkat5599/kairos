@@ -26,6 +26,7 @@ export class WorkflowExecutorService {
     const execution = await this.prisma.workflowExecution.create({
       data: {
         workflowId,
+        creator: variables.creator || 'system',
         status: 'executing',
         currentStep: 0,
         results: {},
@@ -84,10 +85,10 @@ export class WorkflowExecutorService {
         },
       });
 
-      // Increment workflow execution count
+      // Increment workflow usage count
       await this.prisma.workflow.update({
         where: { id: workflowId },
-        data: { executionCount: { increment: 1 } },
+        data: { usageCount: { increment: 1 } },
       });
 
       this.logger.log(`Workflow execution completed: ${execution.id}`);

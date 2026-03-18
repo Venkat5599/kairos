@@ -57,8 +57,11 @@ export class PathOptimizer {
   generateRoutes(parsed: ParsedIntent): RouteNode[][] {
     const routes: RouteNode[][] = [];
 
-    switch (parsed.action) {
+    const action = parsed.action || parsed.type.toLowerCase();
+
+    switch (action) {
       case 'send':
+      case 'transfer':
         routes.push(this.generateDirectRoute(parsed));
         break;
 
@@ -82,7 +85,7 @@ export class PathOptimizer {
   private generateDirectRoute(parsed: ParsedIntent): RouteNode[] {
     return [
       {
-        address: parsed.destination || '0x0',
+        address: parsed.destination || parsed.recipient || '0x0',
         type: 'wallet',
         gasCost: 21000,
         timeCost: 15,
@@ -100,7 +103,7 @@ export class PathOptimizer {
         liquidityScore: 0.8,
       },
       {
-        address: parsed.destination || '0x0',
+        address: parsed.destination || parsed.recipient || '0x0',
         type: 'wallet',
         gasCost: 21000,
         timeCost: 5,
@@ -118,7 +121,7 @@ export class PathOptimizer {
         liquidityScore: 0.95,
       },
       {
-        address: parsed.destination || '0x0',
+        address: parsed.destination || parsed.recipient || '0x0',
         type: 'wallet',
         gasCost: 21000,
         timeCost: 5,
@@ -135,7 +138,7 @@ export class PathOptimizer {
         timeCost: 120,
       },
       {
-        address: parsed.destination || '0x0',
+        address: parsed.destination || parsed.recipient || '0x0',
         type: 'wallet',
         gasCost: 50000,
         timeCost: 30,

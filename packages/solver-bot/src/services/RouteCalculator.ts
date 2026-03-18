@@ -53,9 +53,10 @@ export class RouteCalculator {
       );
 
       // Step 4: Calculate slippage
+      const amountValue = parsedIntent.amount ? Number(parsedIntent.amount) : 0;
       const slippage = this.pathOptimizer.estimateSlippage(
         optimizedPath,
-        parsedIntent.amount || 0
+        amountValue
       );
 
       // Step 5: Analyze profitability
@@ -76,7 +77,8 @@ export class RouteCalculator {
       }
 
       // Step 7: Calculate ML score with historical data
-      const historicalData = await this.getHistoricalData(parsedIntent.action);
+      const action = parsedIntent.action || 'unknown';
+      const historicalData = await this.getHistoricalData(action);
       const mlScore = this.profitabilityCalculator.scoreRouteWithML(
         optimizedPath,
         profitability,

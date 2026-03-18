@@ -23,7 +23,7 @@ class SolverBot {
 
     // Initialize services
     this.contractInteraction = new ContractInteraction(this.wallet);
-    this.routeCalculator = new RouteCalculator();
+    this.routeCalculator = new RouteCalculator(this.provider);
     this.xcmExecutor = new XCMExecutor(this.wallet);
     this.intentListener = new IntentListener(
       this.provider,

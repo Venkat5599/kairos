@@ -3,11 +3,14 @@ import { logger } from '../utils/logger';
 
 export interface ParsedIntent {
   type: 'TRANSFER' | 'SWAP' | 'CROSS_CHAIN' | 'UNKNOWN';
+  action?: string;
   recipient?: string;
+  destination?: string;
   amount?: bigint;
   token?: string;
   fromChain?: string;
   toChain?: string;
+  confidence?: number;
   raw: string;
 }
 
@@ -32,14 +35,17 @@ export class IntentParser {
     if (sendMatch) {
       const amount = ethers.parseEther(sendMatch[1]);
       const recipient = sendMatch[2];
-      
+
       logger.info('Parsed as TRANSFER', { amount: sendMatch[1], recipient });
-      
+
       return {
         type: 'TRANSFER',
+        action: 'send',
         recipient,
+        destination: recipient,
         amount,
         token: 'DEV',
+        confidence: 0.95,
         raw: description,
       };
     }
@@ -51,14 +57,17 @@ export class IntentParser {
     if (transferMatch) {
       const amount = ethers.parseEther(transferMatch[1]);
       const recipient = transferMatch[2];
-      
+
       logger.info('Parsed as TRANSFER', { amount: transferMatch[1], recipient });
-      
+
       return {
         type: 'TRANSFER',
+        action: 'send',
         recipient,
+        destination: recipient,
         amount,
         token: 'DEV',
+        confidence: 0.95,
         raw: description,
       };
     }
@@ -70,23 +79,46 @@ export class IntentParser {
     if (simpleMatch) {
       const amount = ethers.parseEther(simpleMatch[1]);
       const recipient = simpleMatch[2];
-      
+
       logger.info('Parsed as TRANSFER (simple)', { amount: simpleMatch[1], recipient });
-      
+
       return {
         type: 'TRANSFER',
+        action: 'send',
         recipient,
+        destination: recipient,
         amount,
         token: 'DEV',
+        confidence: 0.9,
         raw: description,
       };
     }
 
     logger.warn('Could not parse intent', { description });
-    
+
     return {
       type: 'UNKNOWN',
+      action: 'unknown',
+      confidence: 0,
       raw: description,
+    };
+  }
+
+  /**
+   * Parse intent description (alias for parse)
+   */
+  parseIntent(description: string): ParsedIntent {
+    return this.parse(description);
+  }
+
+  /**
+   * Validate parsed intent with detailed result
+   */
+  validateIntent(parsed: ParsedIntent): { valid: boolean; errors?: string[] } {
+    const isValid = this.validate(parsed);
+    return {
+      valid: isValid,
+      errors: isValid ? undefined : ['Invalid intent format'],
     };
   }
 
