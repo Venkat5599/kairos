@@ -150,21 +150,42 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
     if (isPending && !isProcessing) {
       console.log('Transaction pending - waiting for user confirmation');
       setIsProcessing(true);
-      toast.loading('Confirm transaction in wallet...', { id: 'intent-tx' });
+      toast.loading('Waiting for wallet confirmation...', { id: 'intent-tx', duration: Infinity });
     }
   }, [isPending, isProcessing]);
 
   useEffect(() => {
     if (isConfirming && isProcessing) {
       console.log('Transaction confirming on blockchain...');
-      toast.loading('Transaction confirming...', { id: 'intent-tx' });
+      toast.loading('⏳ Transaction submitted! Waiting for confirmation (~1-2 min)...', { 
+        id: 'intent-tx',
+        duration: Infinity 
+      });
     }
   }, [isConfirming, isProcessing]);
 
   useEffect(() => {
     if (isConfirmed && isProcessing) {
       console.log('Transaction confirmed! Hash:', hash);
-      toast.success('Intent created successfully!', { id: 'intent-tx' });
+      toast.success('🎉 Intent created successfully!', { id: 'intent-tx', duration: 5000 });
+      
+      // Show success notification with transaction link
+      const explorerUrl = `https://blockscout-testnet.polkadot.io/tx/${hash}`;
+      toast.success(
+        <div className="flex flex-col space-y-2">
+          <span className="font-bold">✅ Transaction Confirmed!</span>
+          <a 
+            href={explorerUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-cyber-blue hover:underline text-sm"
+          >
+            View on Explorer →
+          </a>
+        </div>,
+        { duration: 10000 }
+      );
+      
       setCommand('');
       setIsProcessing(false);
       onIntentCreated?.();
@@ -193,6 +214,19 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
         </div>
       </div>
       <div className="p-6 space-y-4">
+        {/* Info banner about transaction times */}
+        {isProcessing && isConfirming && (
+          <div className="bg-cyber-blue/10 border border-cyber-blue/30 rounded p-3 text-xs text-cyber-blue">
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Transaction submitted! Polkadot Hub TestNet typically takes 1-2 minutes for confirmation. Please wait...</span>
+            </div>
+          </div>
+        )}
+        
         <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
           <div className="flex-grow w-full relative">
             <div className="bg-black/40 p-4 rounded border border-cyber-blue/20 font-mono text-sm md:text-base flex items-center">
@@ -236,17 +270,26 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
           <button
             onClick={handleExecute}
             disabled={!isConnected || isProcessing}
-            className="w-full md:w-auto px-8 py-4 bg-cyber-blue/20 hover:bg-cyber-blue/30 border border-cyber-blue text-cyber-blue font-orbitron font-bold rounded flex items-center justify-center transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full md:w-auto px-8 py-4 bg-cyber-blue/20 hover:bg-cyber-blue/30 border border-cyber-blue text-cyber-blue font-orbitron font-bold rounded flex items-center justify-center transition-all group disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
           >
-            <span className="mr-2 uppercase tracking-widest">
-              {isProcessing ? 'Processing...' : 'Execute'}
+            {isProcessing && (
+              <div className="absolute inset-0 bg-cyber-blue/10">
+                <div className="h-full bg-cyber-blue/30 animate-pulse" style={{ width: isConfirming ? '75%' : '25%' }}></div>
+              </div>
+            )}
+            <span className="mr-2 uppercase tracking-widest relative z-10">
+              {isConfirming ? 'Confirming...' : isProcessing ? 'Processing...' : 'Execute'}
             </span>
             <svg
-              className="w-4 h-4 group-hover:scale-125 transition-transform"
+              className={`w-4 h-4 transition-transform relative z-10 ${isProcessing ? 'animate-spin' : 'group-hover:scale-125'}`}
               fill="currentColor"
               viewBox="0 0 20 20"
             >
-              <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16.243 16.243a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707z" />
+              {isProcessing ? (
+                <path d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 2a5 5 0 110 10 5 5 0 010-10z" opacity="0.3" />
+              ) : (
+                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16.243 16.243a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707z" />
+              )}
             </svg>
           </button>
         </div>
