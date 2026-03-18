@@ -118,7 +118,7 @@ const IntentTerminal = memo(function IntentTerminal({ onIntentCreated, initialCo
       }
 
       setIsProcessing(true);
-      toast.loading('Preparing transaction...', { id: 'intent-tx' });
+      toast.loading('Creating and executing intent...', { id: 'intent-tx' });
 
       await createIntent({
         description,

@@ -8,7 +8,7 @@
 
 ## 🎯 What is Kairos?
 
-Kairos is an **intent-based execution platform** for the Polkadot ecosystem. Users express what they want in natural language (e.g., "send 1 PAS to 0x..."), and our automated solver network executes it efficiently across chains using XCM.
+Kairos is an **intent-based execution platform** for the Polkadot ecosystem. Users express what they want in natural language (e.g., "send 1 PAS to 0x..."), and the system executes it directly through smart contracts.
 
 ### The Problem
 - Cross-chain operations on Polkadot are complex
@@ -16,8 +16,8 @@ Kairos is an **intent-based execution platform** for the Polkadot ecosystem. Use
 - High barrier to entry for mainstream adoption
 
 ### The Solution
-- **Natural language intents**: Type what you want, we handle the rest
-- **Automated execution**: Solver network executes intents 24/7
+- **Natural language intents**: Type what you want in plain English
+- **Direct execution**: Smart contracts execute intents immediately
 - **Cross-chain ready**: Native XCM integration for Polkadot ecosystem
 
 ## ✨ Key Features
@@ -25,39 +25,45 @@ Kairos is an **intent-based execution platform** for the Polkadot ecosystem. Use
 ### 1. Natural Language Processing
 ```
 User types: "send 1 PAS to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
-Kairos: ✅ Intent created and executed automatically
+Kairos: ✅ Intent created and executed on-chain
 ```
 
-### 2. AI-Powered Suggestions
+### 2. Voice Input
+- 🎤 Speak your intents instead of typing
+- Automatic speech-to-text conversion
+- Works in Chrome, Edge, and Safari
+- Makes blockchain accessible to everyone
+
+### 3. AI-Powered Suggestions
 - Autocomplete appears when typing 2+ characters
 - Smart suggestions based on context
 - Helps users write correct intents
 
-### 3. Intent Templates Library
+### 4. Intent Templates Library
 - 6 pre-built templates for common operations
 - Simple transfers, cross-chain bridges, batch operations
 - Filterable by category and difficulty
 - One-click template insertion
 
-### 4. XCM Bridge UI
+### 5. XCM Bridge UI
 - Visual cross-chain transfer interface
 - 5 supported chains: Polkadot Hub, Polkadot Relay, Asset Hub, Astar, Moonbeam
 - Chain selection with icons
 - Swap chains functionality
 
-### 5. Intent Marketplace
-- Browse all pending intents
-- Filter by type and sort by reward
-- Solvers can claim and execute intents
-- Earn rewards for successful execution
+### 6. Intent Marketplace
+- Browse community-created intent templates
+- 6 sample templates with ratings and usage stats
+- Filter by category (transfer, cross-chain, staking, DeFi, governance)
+- Clone and customize templates
 
-### 6. Automated Solver Network
-- Bots monitor blockchain 24/7
-- Automatic intent detection and execution
-- Reputation system with staking
-- Deployed on Railway for 24/7 uptime
+### 7. Direct Smart Contract Execution
+- No bots or intermediaries needed
+- Intents execute directly on-chain
+- Users can execute their own intents instantly
+- Optional: Register as a solver to execute others' intents and earn rewards
 
-### 7. Cross-Chain Ready
+### 8. Cross-Chain Ready
 - Native XCM integration
 - Support for multiple parachains
 - Real cross-chain transfers
@@ -66,12 +72,13 @@ Kairos: ✅ Intent created and executed automatically
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐     ┌──────────────────┐     ┌─────────────┐
-│   Frontend  │────▶│ Smart Contracts  │◀────│ Solver Bot  │
-│  (Next.js)  │     │ (Polkadot Hub)   │     │  (Railway)  │
-└─────────────┘     └──────────────────┘     └─────────────┘
-      │                      │                       │
-      │                      │                       │
+┌─────────────┐     ┌──────────────────┐
+│   Frontend  │────▶│ Smart Contracts  │
+│  (Next.js)  │     │ (Polkadot Hub)   │
+└─────────────┘     └──────────────────┘
+      │                      │
+      └──────────────────────┘
+         Direct Execution
       └──────────────────────┴───────────────────────┘
                     Blockchain Integration
 ```
@@ -124,30 +131,8 @@ Visit http://localhost:3000
    send 0.01 PAS to 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
    ```
 4. Click "Execute Intent"
-5. Watch the solver bot pick it up and execute!
-
-## 🤖 Solver Bot Deployment
-
-The solver bot is deployed on Railway and runs 24/7:
-
-**Dashboard**: https://railway.com/project/77a014ca-68bc-486e-8b39-734adb48742d
-
-### Deploy Your Own Solver
-
-```bash
-cd packages/solver-bot
-
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway init
-railway variables set SOLVER_PRIVATE_KEY=your_key
-railway variables set RPC_URL=https://eth-rpc-testnet.polkadot.io
-railway variables set INTENT_REGISTRY_ADDRESS=0x237B40f9c2D95B4847221D7bF91b5A36c46da7e2
-railway up
-```
+5. Intent is created and ready to execute!
+6. Click "Execute Now" to complete it instantly
 
 ## 🛠️ Tech Stack
 
@@ -164,12 +149,6 @@ railway up
 - OpenZeppelin
 - XCM Precompiles
 
-### Solver Bot
-- Node.js 18
-- TypeScript
-- ethers.js v6
-- Deployed on Railway
-
 ### Blockchain
 - Polkadot Hub TestNet
 - Chain ID: 420420417
@@ -183,7 +162,6 @@ kairos/
 ├── packages/
 │   ├── frontend/          # Next.js frontend
 │   ├── contracts/         # Solidity smart contracts
-│   ├── solver-bot/        # Automated solver bot
 │   └── backend/           # Optional backend API
 ├── docs/                  # Documentation
 └── README.md             # This file
@@ -192,20 +170,21 @@ kairos/
 ## 🎯 Use Cases
 
 ### For Users
-- **Simple Transfers**: Send tokens with natural language
+- **Simple Transfers**: Send tokens with natural language or voice
 - **Cross-Chain Bridges**: Transfer assets across parachains
 - **Batch Operations**: Multiple transfers in one intent
 - **DeFi Operations**: Swap, stake, provide liquidity
+- **Instant Execution**: Execute intents directly without waiting
 
-### For Solvers
-- **Earn Rewards**: Execute intents and earn PAS tokens
+### For Solvers (Optional)
+- **Earn Rewards**: Execute others' intents and earn PAS tokens
 - **Build Reputation**: Successful executions increase reputation
-- **Automated Income**: Run bot 24/7 for passive income
+- **Decentralized Network**: Anyone can become a solver
 
 ### For Developers
 - **Intent-Based dApps**: Build on top of Kairos
 - **Cross-Chain Integration**: Easy XCM integration
-- **Solver Network**: Leverage existing infrastructure
+- **Smart Contract Templates**: Reusable intent patterns
 
 ## 🏆 Hackathon Submission
 
@@ -215,12 +194,13 @@ kairos/
 
 ### What Makes This Special
 
-1. **Innovation**: First intent-based execution platform for Polkadot
-2. **User Experience**: Natural language > complex transactions
-3. **Production Ready**: Fully deployed, not just a demo
-4. **Technical Depth**: Smart contracts + AI + solver network + XCM
+1. **Innovation**: First intent-based execution platform for Polkadot with voice input
+2. **User Experience**: Natural language + voice > complex transactions
+3. **Production Ready**: Fully deployed and functional
+4. **Technical Depth**: Smart contracts + AI + voice recognition + XCM
 5. **Real Utility**: Solves actual UX problems in Web3
 6. **Polkadot Native**: Built specifically for Polkadot ecosystem
+7. **No Intermediaries**: Direct smart contract execution
 
 ## 📝 License
 
